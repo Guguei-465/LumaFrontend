@@ -39,52 +39,47 @@ const ParentSidebar = ({ isOpen, setIsOpen }) => {
             </NavLink>
 
             <div className="pt-3 mt-3 border-t border-white/10 space-y-1.5">
-              <NavLink to="//parent-dashboard/my-children" end className={linkClass} onClick={() => setIsOpen(false)}>
+              <NavLink to="/parent-dashboard/my-children" end className={linkClass} onClick={() => setIsOpen(false)}>
                 <i className="bi bi-people-fill text-lg"></i>
                 <span>My Children</span>
               </NavLink>
 
-              <NavLink to="//parent-dashboard/fees" end className={linkClass} onClick={() => setIsOpen(false)}>
+              <NavLink to="/parent-dashboard/fees" end className={linkClass} onClick={() => setIsOpen(false)}>
                 <i className="bi bi-cash-stack text-lg"></i>
                 <span>Fees</span>
               </NavLink>
 
-              <NavLink to="//parent-dashboard/payments" end className={linkClass} onClick={() => setIsOpen(false)}>
+              <NavLink to="/parent-dashboard/payments" end className={linkClass} onClick={() => setIsOpen(false)}>
                 <i className="bi bi-receipt-cutoff text-lg"></i>
                 <span>Payments</span>
               </NavLink>
 
-              <NavLink to="//parent-dashboard/attendance" end className={linkClass} onClick={() => setIsOpen(false)}>
+              <NavLink to="/parent-dashboard/attendance" end className={linkClass} onClick={() => setIsOpen(false)}>
                 <i className="bi bi-calendar-check-fill text-lg"></i>
                 <span>Attendance</span>
               </NavLink>
 
-              <NavLink to="//parent-dashboard/results" end className={linkClass} onClick={() => setIsOpen(false)}>
+              <NavLink to="/parent-dashboard/results" end className={linkClass} onClick={() => setIsOpen(false)}>
                 <i className="bi bi-bar-chart-line-fill text-lg"></i>
                 <span>CBC Results</span>
               </NavLink>
 
-              <NavLink to="//parent-dashboard/report-cards" end className={linkClass} onClick={() => setIsOpen(false)}>
+              <NavLink to="/parent-dashboard/report-cards" end className={linkClass} onClick={() => setIsOpen(false)}>
                 <i className="bi bi-file-earmark-text-fill text-lg"></i>
                 <span>Report Cards</span>
               </NavLink>
-
-              <NavLink to="//parent-dashboard/messages" end className={linkClass} onClick={() => setIsOpen(false)}>
-                <i className="bi bi-chat-dots-fill text-lg"></i>
-                <span>Messages</span>
-              </NavLink>
-
-              <NavLink to="//parent-dashboard/notifications" end className={linkClass} onClick={() => setIsOpen(false)}>
+              
+              <NavLink to="/parent-dashboard/notifications" end className={linkClass} onClick={() => setIsOpen(false)}>
                 <i className="bi bi-bell-fill text-lg"></i>
                 <span>Notifications</span>
               </NavLink>
 
-              <NavLink to="//parent-dashboard/settings" end className={linkClass} onClick={() => setIsOpen(false)}>
+              <NavLink to="/parent-dashboard/settings" end className={linkClass} onClick={() => setIsOpen(false)}>
                 <i className="bi bi-gear-fill text-lg"></i>
                 <span>Settings</span>
               </NavLink>
 
-              <NavLink to="//parent-dashboard/profile" end className={linkClass} onClick={() => setIsOpen(false)}>
+              <NavLink to="/parent-dashboard/profile" end className={linkClass} onClick={() => setIsOpen(false)}>
                 <i className="bi bi-person-circle text-lg"></i>
                 <span>My Profile</span>
               </NavLink>

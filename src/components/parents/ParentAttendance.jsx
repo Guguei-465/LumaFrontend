@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import UserAvatar from "../UseAvata";
 import api from "../api/api";
 
-// Reusable Spinner Component
 const Spinner = () => (
   <div className="flex justify-center items-center py-12">
     <div className="animate-spin rounded-full h-10 w-10 border-b-3 border-green-600"></div>
@@ -19,10 +18,44 @@ const ParentAttendance = () => {
     try {
       setLoading(true);
       setError(false);
-      const res = await api.get("/dashboard/parent/attendance/");
-      setAttendance(res.data);
+
+      // ✅ Step 1: Get your children list first (this endpoint EXISTS)
+      const { data: children } = await api.get("dashboard/parent/children/");
+      const childList = Array.isArray(children) ? children : [];
+
+      if (childList.length === 0) {
+        setAttendance([]);
+        return;
+      }
+
+      // ✅ Step 2: Fetch attendance for EACH child (this endpoint EXISTS)
+      const attendancePromises = childList.map(async (child) => {
+        try {
+          const res = await api.get(`attendance/student/${child.student_id || child.id}/`);
+          return {
+            ...child,
+            present: res.data?.present || 0,
+            absent: res.data?.absent || 0,
+            excused: res.data?.excused || 0,
+            attendance_percentage: res.data?.attendance_percentage || 0
+          };
+        } catch {
+          // If attendance fails for one child, still show their basic info
+          return {
+            ...child,
+            present: 0,
+            absent: 0,
+            excused: 0,
+            attendance_percentage: 0
+          };
+        }
+      });
+
+      const allAttendance = await Promise.all(attendancePromises);
+      setAttendance(allAttendance);
+
     } catch (err) {
-      console.error("Failed to load attendance:", err);
+      console.error("Failed to load attendance:", err.response?.status, err.response?.data);
       setError(true);
     } finally {
       setLoading(false);
@@ -37,34 +70,36 @@ const ParentAttendance = () => {
 
   if (error)
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4">
-        Failed to load attendance records. Please try again later.
+      <div className="p-4 md:p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4">
+          Failed to load attendance records. Please try again later.
+        </div>
       </div>
     );
 
   return (
-    <div>
-      {/* Page Header */}
+    <div className="p-4 md:p-6">
       <div className="mb-6">
         <h3 className="text-xl font-bold text-gray-800">Attendance</h3>
         <p className="text-sm text-gray-500 mt-1">Attendance summary for all your children.</p>
       </div>
 
-      {/* Attendance Cards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {attendance.length > 0 ? (
+        {attendance.length === 0 ? (
+          <div className="col-span-full">
+            <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg p-4">
+              No attendance records found for your children yet.
+            </div>
+          </div>
+        ) : (
           attendance.map((child) => (
             <div
               key={child.student_id || child.id}
               className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 transition-shadow hover:shadow"
             >
-              {/* Student Header */}
               <div className="flex items-center mb-4">
                 <UserAvatar
-                  user={{
-                    username: child.first_name,
-                    profile_picture: child.photo,
-                  }}
+                  user={{ username: child.first_name, profile_picture: child.photo }}
                   size={55}
                 />
                 <div className="ml-3">
@@ -77,7 +112,6 @@ const ParentAttendance = () => {
                 </div>
               </div>
 
-              {/* Attendance Stats Table */}
               <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
                 <tbody>
                   <tr className="border-b border-gray-100">
@@ -110,12 +144,6 @@ const ParentAttendance = () => {
               </table>
             </div>
           ))
-        ) : (
-          <div className="col-span-1 lg:col-span-2">
-            <div className="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg p-4">
-              No attendance records found for your children yet.
-            </div>
-          </div>
         )}
       </div>
     </div>

@@ -82,7 +82,6 @@ import LearningOutcomes from "./components/academiccoordinator/LearnigOutcomes";
 import AcademicCoProfile from "./components/academiccoordinator/AademicCoProfile";
 import TimetableForm from "./components/academiccoordinator/TimetableForm";
 import ParentLayout from "./components/parents/ParentLayout";
-import ParentMessage from "./components/parents/ParentMessage";
 import ParentSettings from "./components/parents/ParentSettings";
 import ParentReportCard from "./components/parents/ParentReportCard";
 import ParentPayment from "./components/parents/ParentPayment";
@@ -162,17 +161,16 @@ function App() {
             <Route path="profile" element={<AccountantProfile />} />
           </Route>
 
-          {/* ================= PARENT (Fixed & Protected) ================= */}
+{/* ================= PARENT (Fixed & Protected) ================= */}
           <Route
             path="/parent-dashboard"
             element={
-              <ProtectedRoutes allowedRoles={["PARENT"]}>
+              <ProtectedRoutes allowedRoles={["parent"]}>
                 <ParentLayout />
               </ProtectedRoutes>
             }
           >
             <Route index element={<ParentDashboard />} />
-            <Route path="dashboard" element={<ParentDashboard />} />
             <Route path="my-children" element={<MyChildren />} />
             <Route path="my-children/:studentId" element={<ChildDetail />} />
             <Route path="attendance" element={<ParentAttendance />} />
@@ -182,7 +180,6 @@ function App() {
             <Route path="pay/new/:studentId" element={<ParentPayment />} />
             <Route path="report-cards" element={<ParentReportCard />} />
             <Route path="notifications" element={<ParentNotifications />} />
-            <Route path="messages" element={<ParentMessage/>} />
             <Route path="settings" element={<ParentSettings />} />
             <Route path="profile" element={<ParentProfile />} />
           </Route>

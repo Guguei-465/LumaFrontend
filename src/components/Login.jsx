@@ -33,7 +33,7 @@ const Login = () => {
                 ACADEMIC_COORDINATOR: "/academic-coordinator",
                 ACCOUNTANT: "/accountant",
                 TEACHER: "/teacher",
-                PARENT: "/parent/dashboard",
+                PARENT: "/parent-dashboard",
             };
             navigate(routes[user.role] || "/");
         } catch (err) {
