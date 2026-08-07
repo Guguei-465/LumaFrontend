@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  FaClipboardList,
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaSearch,
-} from "react-icons/fa";
+import { FaClipboardList, FaPlus, FaSearch, FaEdit, FaTrash } from "react-icons/fa";
 import api from "../api/api";
 
 const Assessments = () => {
@@ -13,29 +7,12 @@ const Assessments = () => {
   const [assessmentTypes, setAssessmentTypes] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
-
   const [search, setSearch] = useState("");
-
   const [formData, setFormData] = useState({
-    title: "",
-    subject: "",
-    classroom: "",
-    assessment_type: "",
-    academic_year: "",
-    term: "",
-    total_marks: "",
-    assessment_date: "",
+    title: "", subject: "", classroom: "", assessment_type: "",
+    academic_year: "", term: "", total_marks: "", assessment_date: ""
   });
-
   const [editingId, setEditingId] = useState(null);
-
-  const token = localStorage.getItem("access_token");
-
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
 
   useEffect(() => {
     fetchAssessments();
@@ -46,102 +23,51 @@ const Assessments = () => {
 
   const fetchAssessments = async () => {
     try {
-      const res = await api.get(
-        "assessments/",
-        config
-      );
-      setAssessments(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+      const res = await api.get("assessments/");
+      setAssessments(res.data.results || res.data);
+    } catch (err) { console.error(err); }
   };
 
   const fetchAssessmentTypes = async () => {
     try {
-      const res = await api.get(
-        "results/assessment-types/",
-        config
-      );
-      setAssessmentTypes(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+      const res = await api.get("results/assessment-types/");
+      setAssessmentTypes(res.data.results || res.data);
+    } catch (err) { console.error(err); }
   };
 
   const fetchSubjects = async () => {
     try {
-      const res = await api.get(
-        "subjects/",
-        config
-      );
-      setSubjects(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+      const res = await api.get("subjects/");
+      setSubjects(res.data.results || res.data);
+    } catch (err) { console.error(err); }
   };
 
   const fetchClassrooms = async () => {
     try {
-      const res = await api.get(
-        "classes/",
-        config
-      );
-      setClassrooms(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+      const res = await api.get("classes/");
+      setClassrooms(res.data.results || res.data);
+    } catch (err) { console.error(err); }
   };
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const clearForm = () => {
     setEditingId(null);
-
-    setFormData({
-      title: "",
-      subject: "",
-      classroom: "",
-      assessment_type: "",
-      academic_year: "",
-      term: "",
-      total_marks: "",
-      assessment_date: "",
-    });
+    setFormData({ title: "", subject: "", classroom: "", assessment_type: "", academic_year: "", term: "", total_marks: "", assessment_date: "" });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      if (editingId) {
-        await api.put(
-          `assessments/${editingId}/`,
-          formData,
-          config
-        );
-      } else {
-        await api.post(
-          "assessments/",
-          formData,
-          config
-        );
-      }
-
+      if (editingId) await api.put(`assessments/${editingId}/`, formData);
+      else await api.post("assessments/", formData);
       fetchAssessments();
       clearForm();
-    } catch (err) {
-      console.log(err.response?.data);
-    }
+    } catch (err) { console.error(err.response?.data); }
   };
 
   const handleEdit = (assessment) => {
     setEditingId(assessment.id);
-
     setFormData({
       title: assessment.title,
       subject: assessment.subject,
@@ -150,224 +76,97 @@ const Assessments = () => {
       academic_year: assessment.academic_year,
       term: assessment.term,
       total_marks: assessment.total_marks,
-      assessment_date: assessment.assessment_date,
+      assessment_date: assessment.assessment_date
     });
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this assessment?")) return;
-
     try {
-      await api.delete(
-        `assessments/${id}/`,
-        config
-      );
-
+      await api.delete(`assessments/${id}/`);
       fetchAssessments();
-    } catch (err) {
-      console.log(err);
-    }
+    } catch (err) { console.error(err); }
   };
 
-  const filteredAssessments = assessments.filter((assessment) =>
-    assessment.title?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredAssessments = assessments.filter(a => a.title?.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-
-      <div className="bg-white rounded-xl shadow p-6">
-
-        <div className="flex items-center gap-3 mb-6">
-          <FaClipboardList className="text-3xl text-indigo-600" />
-          <h1 className="text-2xl font-bold">Assessments</h1>
-        </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
-        >
-          <input
-            type="text"
-            name="title"
-            placeholder="Assessment Title"
-            value={formData.title}
-            onChange={handleChange}
-            className="border rounded-lg p-2"
-            required
-          />
-
-          <select
-            name="subject"
-            value={formData.subject}
-            onChange={handleChange}
-            className="border rounded-lg p-2"
-            required
-          >
-            <option value="">Select Subject</option>
-
-            {subjects.map((subject) => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="classroom"
-            value={formData.classroom}
-            onChange={handleChange}
-            className="border rounded-lg p-2"
-            required
-          >
-            <option value="">Select Classroom</option>
-
-            {classrooms.map((room) => (
-              <option key={room.id} value={room.id}>
-                {room.grade} {room.stream}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="assessment_type"
-            value={formData.assessment_type}
-            onChange={handleChange}
-            className="border rounded-lg p-2"
-            required
-          >
-            <option value="">Assessment Type</option>
-
-            {assessmentTypes.map((type) => (
-              <option key={type.id} value={type.id}>
-                {type.name}
-              </option>
-            ))}
-          </select>
-
-          <input
-            type="text"
-            name="academic_year"
-            placeholder="Academic Year"
-            value={formData.academic_year}
-            onChange={handleChange}
-            className="border rounded-lg p-2"
-            required
-          />
-
-          <input
-            type="text"
-            name="term"
-            placeholder="Term"
-            value={formData.term}
-            onChange={handleChange}
-            className="border rounded-lg p-2"
-            required
-          />
-
-          <input
-            type="number"
-            name="total_marks"
-            placeholder="Total Marks"
-            value={formData.total_marks}
-            onChange={handleChange}
-            className="border rounded-lg p-2"
-            required
-          />
-
-          <input
-            type="date"
-            name="assessment_date"
-            value={formData.assessment_date}
-            onChange={handleChange}
-            className="border rounded-lg p-2"
-            required
-          />
-
-          <button
-            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg p-2 flex justify-center items-center gap-2"
-          >
-            <FaPlus />
-
-            {editingId ? "Update Assessment" : "Create Assessment"}
-          </button>
-        </form>
-
-        <div className="relative mb-5">
-
-          <FaSearch className="absolute top-3 left-3 text-gray-400" />
-
-          <input
-            type="text"
-            placeholder="Search assessment..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border rounded-lg pl-10 p-2 w-full"
-          />
-
-        </div>
-
-        <div className="overflow-x-auto">
-
-          <table className="w-full">
-
-            <thead className="bg-indigo-600 text-white">
-
-              <tr>
-                <th className="p-3">Title</th>
-                <th className="p-3">Subject</th>
-                <th className="p-3">Class</th>
-                <th className="p-3">Type</th>
-                <th className="p-3">Marks</th>
-                <th className="p-3">Date</th>
-                <th className="p-3">Actions</th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {filteredAssessments.map((assessment) => (
-                <tr
-                  key={assessment.id}
-                  className="border-b hover:bg-gray-50"
-                >
-                  <td className="p-3">{assessment.title}</td>
-                  <td className="p-3">{assessment.subject_name}</td>
-                  <td className="p-3">{assessment.classroom_name}</td>
-                  <td className="p-3">{assessment.assessment_type_name}</td>
-                  <td className="p-3">{assessment.total_marks}</td>
-                  <td className="p-3">{assessment.assessment_date}</td>
-
-                  <td className="p-3 flex gap-3">
-
-                    <button
-                      onClick={() => handleEdit(assessment)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <FaEdit />
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(assessment.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <FaTrash />
-                    </button>
-
-                  </td>
-
-                </tr>
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
+    <div className="space-y-8">
+      <div className="flex items-center gap-3">
+        <FaClipboardList className="text-3xl text-green-600" />
+        <h1 className="text-[clamp(1.5rem,3vw,2.2rem)] font-bold text-gray-800">Assessments</h1>
       </div>
 
+      {/* Form */}
+      <div className="card">
+        <form onSubmit={handleSubmit} className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <input type="text" name="title" placeholder="Assessment Title" value={formData.title} onChange={handleChange} className="milk-input" required />
+          <select name="subject" value={formData.subject} onChange={handleChange} className="milk-input" required>
+            <option value="">Select Subject</option>
+            {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+          <select name="classroom" value={formData.classroom} onChange={handleChange} className="milk-input" required>
+            <option value="">Select Class</option>
+            {classrooms.map(c => <option key={c.id} value={c.id}>{c.name} {c.stream || ""}</option>)}
+          </select>
+          <select name="assessment_type" value={formData.assessment_type} onChange={handleChange} className="milk-input" required>
+            <option value="">Assessment Type</option>
+            {assessmentTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+          <input type="text" name="academic_year" placeholder="Academic Year" value={formData.academic_year} onChange={handleChange} className="milk-input" required />
+          <input type="text" name="term" placeholder="Term" value={formData.term} onChange={handleChange} className="milk-input" required />
+          <input type="number" name="total_marks" placeholder="Total Marks" value={formData.total_marks} onChange={handleChange} className="milk-input" required />
+          <input type="date" name="assessment_date" value={formData.assessment_date} onChange={handleChange} className="milk-input" required />
+          <button type="submit" className="milk-btn flex items-center justify-center gap-2 lg:col-span-4">
+            <FaPlus /> {editingId ? "Update Assessment" : "Create Assessment"}
+          </button>
+        </form>
+      </div>
+
+      {/* Search */}
+      <div className="card">
+        <div className="relative max-w-md">
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input type="text" placeholder="Search assessments..." value={search} onChange={(e) => setSearch(e.target.value)} className="milk-input pl-10" />
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="card overflow-x-auto">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="bg-green-600 text-white">
+              <th className="p-3">Title</th>
+              <th className="p-3">Subject</th>
+              <th className="p-3">Class</th>
+              <th className="p-3">Type</th>
+              <th className="p-3">Total Marks</th>
+              <th className="p-3">Date</th>
+              <th className="p-3 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredAssessments.length === 0 ? (
+              <tr><td colSpan={7} className="p-6 text-center text-gray-500">No assessments found.</td></tr>
+            ) : filteredAssessments.map(a => (
+              <tr key={a.id} className="border-b border-gray-100 hover:bg-green-50">
+                <td className="p-3">{a.title}</td>
+                <td className="p-3">{a.subject_name || a.subject}</td>
+                <td className="p-3">{a.classroom_name || a.classroom}</td>
+                <td className="p-3">{a.assessment_type_name || a.assessment_type}</td>
+                <td className="p-3">{a.total_marks}</td>
+                <td className="p-3">{a.assessment_date}</td>
+                <td className="p-3 text-center">
+                  <div className="flex justify-center gap-3">
+                    <button onClick={() => handleEdit(a)} className="text-green-600 hover:text-green-800"><FaEdit /></button>
+                    <button onClick={() => handleDelete(a.id)} className="text-red-600 hover:text-red-800"><FaTrash /></button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

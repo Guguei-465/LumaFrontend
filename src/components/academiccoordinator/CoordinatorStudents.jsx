@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../api/api";
+import { useNavigate } from "react-router-dom";
 
-const StudentsAcademic = () => {
+const CoordinatorStudents = () => {
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,11 +29,12 @@ const StudentsAcademic = () => {
     }
   };
 
+  // Filter by name/admission/class
   const filteredStudents = students.filter((stu) => {
     const matchSearch =
       stu.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       stu.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      stu.admission_number?.toString().toLowerCase().includes(searchTerm.toLowerCase());
+      stu.admission_number?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchClass = selectedClass === "all" || String(stu.current_class?.id) === selectedClass;
     return matchSearch && matchClass;
   });
@@ -111,6 +114,7 @@ const StudentsAcademic = () => {
                   <th className="py-3 px-3 text-gray-600">Admission No.</th>
                   <th className="py-3 px-3 text-gray-600">Current Class</th>
                   <th className="py-3 px-3 text-gray-600">Gender</th>
+                  <th className="py-3 px-3 text-gray-600 text-center">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -126,6 +130,14 @@ const StudentsAcademic = () => {
                       {stu.current_class?.stream && ` - ${stu.current_class.stream}`}
                     </td>
                     <td className="py-3 px-3">{stu.gender || "—"}</td>
+                    <td className="py-3 px-3 text-center">
+                      <button
+                        onClick={() => navigate(`/academic-coordinator/students/${stu.id}`)}
+                        className="milk-btn px-4 py-2 text-sm"
+                      >
+                        View Profile
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -137,5 +149,4 @@ const StudentsAcademic = () => {
   );
 };
 
-export default StudentsAcademic;
-
+export default CoordinatorStudents;

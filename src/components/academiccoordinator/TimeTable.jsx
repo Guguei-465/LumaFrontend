@@ -1,163 +1,83 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import api from "../api/api";
 
-const TimeTable = () => {
-  const [timetable, setTimetable] = useState([]);
-  const [filtered, setFiltered] = useState([]);
-  const [search, setSearch] = useState("");
+const Timetable = () => {
+  const [timetableData, setTimetableData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({ year: "", term: "", class_id: "" });
 
-  const fetchTimetable = async () => {
+  useEffect(() => {
+    loadTimetable();
+  }, [filters]);
+
+  const loadTimetable = async () => {
     try {
-      const token = localStorage.getItem("access_token");
+      const params = new URLSearchParams();
+      if(filters.year) params.append("year", filters.year);
+      if(filters.term) params.append("term", filters.term);
+      if(filters.class_id) params.append("class_id", filters.class_id);
 
-      const res = await api.get(
-        "timetable/",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setTimetable(res.data);
-      setFiltered(res.data);
-    } catch (error) {
-      console.error(error);
+      const res = await api.get(`timetable/by_day/?${params}`);
+      setTimetableData(res.data);
+    } catch (err) {
+      console.error("Failed to load timetable:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchTimetable();
-  }, []);
-
-  useEffect(() => {
-    const data = timetable.filter(
-      (item) =>
-        item.teacher?.toLowerCase().includes(search.toLowerCase()) ||
-        item.subject?.toLowerCase().includes(search.toLowerCase()) ||
-        item.classroom?.toLowerCase().includes(search.toLowerCase()) ||
-        item.day?.toLowerCase().includes(search.toLowerCase())
-    );
-
-    setFiltered(data);
-  }, [search, timetable]);
+  if (loading) return <div className="flex justify-center py-10"><p>Loading Timetable...</p></div>;
 
   return (
-    <div className="p-6">
-      <div className="bg-white rounded-xl shadow-md p-6">
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+          <h1 className="text-[clamp(1.5rem,3vw,2.2rem)] font-bold text-gray-800">Class Timetable</h1>
+          <p className="text-gray-500">Weekly class schedule & lesson times</p>
+        </div>
+        <button onClick={() => window.location.href="/academic-coordinator/timetable/create"} className="milk-btn w-fit">
+          + Create Timetable
+        </button>
+      </div>
 
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">
-              Timetable
-            </h2>
-            <p className="text-gray-500">
-              Manage class timetable schedules.
-            </p>
+      {/* Filters */}
+      <div className="card grid md:grid-cols-3 gap-4">
+        <div>
+          <label className="form-lable">Academic Year</label>
+          <input type="text" placeholder="2025-2026" className="milk-input" value={filters.year} onChange={(e)=>setFilters({...filters, year:e.target.value})}/>
+        </div>
+        <div>
+          <label className="form-lable">Term</label>
+          <input type="text" placeholder="Term 1" className="milk-input" value={filters.term} onChange={(e)=>setFilters({...filters, term:e.target.value})}/>
+        </div>
+        <div>
+          <label className="form-lable">Filter Class ID</label>
+          <input type="number" placeholder="Class ID" className="milk-input" value={filters.class_id} onChange={(e)=>setFilters({...filters, class_id:e.target.value})}/>
+        </div>
+      </div>
+
+      {/* Weekly Timetable Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {Object.values(timetableData).map(day => (
+          <div key={day.name} className="card">
+            <h3 className="text-lg font-bold text-green-700 mb-4 border-b pb-2">{day.name}</h3>
+            {day.entries.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">No lessons scheduled</p>
+            ) : (
+              <div className="space-y-3">
+                {day.entries.map(entry => (
+                  <div key={entry.id} className="p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="font-semibold">{entry.subject_name}</p>
+                    <p className="text-sm text-gray-600">{entry.teacher_name} • {entry.start_time} - {entry.end_time}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-
-          <Link
-            to="/academic-coordinator/timetable/create"
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-          >
-            <i className="bi bi-plus-circle-fill"></i>
-            Add Lesson
-          </Link>
-        </div>
-
-        {/* Search */}
-        <div className="relative mb-5">
-          <i className="bi bi-search absolute left-3 top-3 text-gray-400"></i>
-
-          <input
-            type="text"
-            placeholder="Search timetable..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full border rounded-lg pl-10 pr-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="text-left px-4 py-3">Day</th>
-                <th className="text-left px-4 py-3">Teacher</th>
-                <th className="text-left px-4 py-3">Subject</th>
-                <th className="text-left px-4 py-3">Class</th>
-                <th className="text-left px-4 py-3">Start</th>
-                <th className="text-left px-4 py-3">End</th>
-                <th className="text-center px-4 py-3">Status</th>
-                <th className="text-center px-4 py-3">Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan="8"
-                    className="text-center py-6 text-gray-500"
-                  >
-                    Loading timetable...
-                  </td>
-                </tr>
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="8"
-                    className="text-center py-6 text-gray-500"
-                  >
-                    No timetable found.
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((lesson) => (
-                  <tr
-                    key={lesson.id}
-                    className="border-b hover:bg-gray-50"
-                  >
-                    <td className="px-4 py-3">{lesson.day}</td>
-                    <td className="px-4 py-3">{lesson.teacher}</td>
-                    <td className="px-4 py-3">{lesson.subject}</td>
-                    <td className="px-4 py-3">{lesson.classroom}</td>
-                    <td className="px-4 py-3">{lesson.start_time}</td>
-                    <td className="px-4 py-3">{lesson.end_time}</td>
-
-                    <td className="text-center px-4 py-3">
-                      {lesson.is_active ? (
-                        <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">
-                          Inactive
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="text-center px-4 py-3">
-                      <button className="text-blue-600 hover:text-blue-800">
-                        <i className="bi bi-eye-fill"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
+        ))}
       </div>
     </div>
   );
 };
 
-export default TimeTable;
+export default Timetable;

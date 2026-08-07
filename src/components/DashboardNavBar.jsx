@@ -21,10 +21,10 @@ const DashboardNavBar = ({ onMenuClick }) => {
                     </button>
 
                     <div className='flex items-center gap-2'>
-                        <div className='w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-base'>
+                        <div className='w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center text-white font-bold text-base'>
                             {userInitial}
                         </div>
-                        <span className='text-base md:text-xl font-bold text-green-600 tracking-tight'>
+                        <span className='text-base md:text-xl font-bold from text-yellow-600 to text-orange-600 tracking-tight'>
                             Luma 2000 Academy
                         </span>
                     </div>
@@ -34,7 +34,7 @@ const DashboardNavBar = ({ onMenuClick }) => {
                 <div className='flex items-center gap-2 sm:gap-3 md:gap-4'>
                     {/* User info – visible from small screens up */}
                     <div className='hidden sm:flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full'>
-                        <div className='w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold'>
+                        <div className='w-7 h-7 rounded-full bg-gray-500 text-white flex items-center justify-center text-sm font-bold'>
                             {userInitial}
                         </div>
                         <div className='flex flex-col leading-tight'>
@@ -50,7 +50,7 @@ const DashboardNavBar = ({ onMenuClick }) => {
                     {/* Logout button */}
                     <button 
                         onClick={Logout}
-                        className='px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-red-500 text-red-600
+                        className='px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm rounded-lg border border-red-500 text-red-900
                                    hover:bg-red-500 hover:text-white transition-all duration-200 active:scale-95'
                     >
                         Logout

@@ -7,8 +7,6 @@ import Login from "./components/Login";
 import Home from "./components/Home";
 import NotFound from "./components/NotFound";
 import Unauthorized from "./components/Unauthorized";
-
-/* ================= ADMIN ================= */
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import Users from "./components/admin/Users";
@@ -27,17 +25,6 @@ import FeeForm from "./components/admin/FeeForm";
 import Payments from "./components/admin/Payments";
 import Reports from "./components/admin/Reports";
 import AdminProfile from "./components/admin/AdminProfile";
-
-/* ================= ACADEMIC COORDINATOR ================= */
-import AcademicCoLayout from "./components/academiccoordinator/AcademicCoLayout";
-import AcademicCoDashboard from "./components/academiccoordinator/AcademicCoDashboard";
-import Assessments from "./components/academiccoordinator/Assessments";
-import Timetable from "./components/academiccoordinator/TimeTable";
-import StudentResults from "./components/academiccoordinator/StudentResults";
-import GradeScales from "./components/academiccoordinator/GradeScales";
-import ReportComments from "./components/academiccoordinator/ReportComments";
-
-/* ================= ACCOUNTANT ================= */
 import AccountantLayout from "./components/accountant/AccountantLayout";
 import AccountantDashboard from "./components/accountant/AccountantDashboard";
 import AccountantNotice from "./components/accountant/AccountantNotices";
@@ -46,8 +33,6 @@ import StudentFees from "./components/accountant/StudentFees";
 import FeePayments from "./components/accountant/FeePayment";
 import FinanceReport from "./components/accountant/FinaceReport";
 import AccountantProfile from "./components/accountant/AccountantProfile";
-
-/* ================= PARENT ================= */
 import ParentDashboard from "./components/parents/ParentDashboard";
 import MyChildren from "./components/parents/MyChildren";
 import ParentAttendance from "./components/parents/ParentAttendance";
@@ -56,36 +41,40 @@ import ParentFees from "./components/parents/ParentFees";
 import ParentPayments from "./components/parents/ParentPayment";
 import ParentNotifications from "./components/parents/ParentNotifications";
 import ParentProfile from "./components/parents/ParentProfile";
-
-/* ================= TEACHER ================= */
-import TeacherRoute from "./components/teachers/TeacherRoutes";
-import TeacherLayout from "./components/teachers/TeacherLayout";
-import TeacherDashboard from "./components/teachers/TeacherDashboard";
-import TeachingAssignments from "./components/teachers/TeachingAssignments";
-import AssignmentDetails from "./components/teachers/AssignmentDetails";
-import TeacherAssessments from "./components/teachers/TeacherAssessments";
-import AssessmentsMarksEntry from "./components/teachers/AssessmentsMarksEntry";
-import MarkAttendance from "./components/teachers/MarkAttendance";
-import TeacherStudents from "./components/teachers/TeacherStudent";
-import TeacherStudentDetails from "./components/teachers/TeacherStudentDetails";
-import TeacherTimetable from "./components/teachers/TeacherTimetable";
-import TeacherProfile from "./components/teachers/TeacherProfile";
 import AdminTimetables from "./components/admin/AdminTimetable";
 import AdminTimetableForm from "./components/academiccoordinator/TimetableForm";
 import RegisterUsers from "./components/admin/RegisterUsers";
 import RegisterStudents from "./components/admin/RegisterStudents";
 import AdminStudents from "./components/admin/AdminStudents";
 import StudentsAcademic from "./components/academiccoordinator/StudentsAcademic";
-import SubjectsAcademic from "./components/academiccoordinator/SubjectsAcademic";
-import ResultsSubmissions from "./components/academiccoordinator/ResultsSubmission";
-import LearningOutcomes from "./components/academiccoordinator/LearnigOutcomes";
-import AcademicCoProfile from "./components/academiccoordinator/AademicCoProfile";
-import TimetableForm from "./components/academiccoordinator/TimetableForm";
 import ParentLayout from "./components/parents/ParentLayout";
 import ParentSettings from "./components/parents/ParentSettings";
 import ParentReportCard from "./components/parents/ParentReportCard";
 import ParentPayment from "./components/parents/ParentPayment";
 import ChildDetail from "./components/parents/ChildDetails";
+import TeacherMarksEntry from "./components/teachers/TeacherMarksEntry";
+import TeacherResults from "./components/teachers/TeacherResults";
+import TeacherAttendance from "./components/teachers/TeacherAttendance";
+import TeacherReports from "./components/teachers/TeacherReports";
+import TeacherLayout from "./components/teachers/TeacherLayout";
+import TeacherDashboard from "./components/teachers/TeacherDashboard";
+import TeacherStudents from "./components/teachers/TeacherStudents";
+import TeacherAssessments from "./components/teachers/TeacherAssessments";
+import TeacherTimetable from "./components/teachers/TeacherTimetable";
+import TeacherProfile from "./components/teachers/TeacherProfile";
+import ResetPassword from "./components/ResetPassword";
+import AcademicCoLayout from "./components/academiccoordinator/AcademicCoLayout";
+import AcademicCoDashboard from "./components/academiccoordinator/AcademicCoDashboard";
+import SubjectsAcademic from "./components/academiccoordinator/SubjectsAcademic";
+import Assessments from "./components/academiccoordinator/Assessments";
+import Timetable from "./components/academiccoordinator/Timetable";
+import TimetableForm from "./components/academiccoordinator/TimetableForm";
+import AcademicCoProfile from "./components/academiccoordinator/AademicCoProfile";
+import LearningOutcomes from "./components/academiccoordinator/LearnigOutcomes";
+import GradeScales from "./components/academiccoordinator/GradeScales";
+import ReportComments from "./components/academiccoordinator/ReportComments";
+import ResultSubmissions from "./components/academiccoordinator/ResultSubmissions";
+import StudentResults from "./components/academiccoordinator/StudentResults";
 
 function App() {
   return (
@@ -96,6 +85,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Global Protected Routes Wrapper */}
         <Route element={<ProtectedRoutes />}>
@@ -134,14 +124,21 @@ function App() {
           </Route>
 
           {/* ================= ACADEMIC COORDINATOR ================= */}
-          <Route path="/academic-coordinator" element={<AcademicCoLayout />}>
+          <Route
+            path="/academic-coordinator"
+            element={
+              <ProtectedRoutes allowedRoles={["academic-coordinator"]}>
+                <AcademicCoLayout />
+              </ProtectedRoutes>
+            }
+          >
             <Route index element={<AcademicCoDashboard />} />
             <Route path="students" element={<StudentsAcademic />} />
             <Route path="subjects" element={<SubjectsAcademic />} />
-            <Route path="assessments" element={<Assessments />} />
+<Route path="assessments" element={<Assessments />} />
             <Route path="timetable" element={<Timetable />} />
             <Route path="timetable/create" element={<TimetableForm />} />
-            <Route path="result-submissions" element={<ResultsSubmissions />} />
+            <Route path="result-submissions" element={<ResultSubmissions />} />
             <Route path="student-results" element={<StudentResults />} />
             <Route path="grade-scales" element={<GradeScales />} />
             <Route path="report-comments" element={<ReportComments />} />
@@ -184,22 +181,26 @@ function App() {
             <Route path="profile" element={<ParentProfile />} />
           </Route>
 
-          {/* ================= TEACHER ================= */}
-          <Route element={<TeacherRoute />}>
-            <Route path="/teacher" element={<TeacherLayout />}>
-              <Route index element={<TeacherDashboard />} />
-              <Route path="my-assignments" element={<TeachingAssignments />} />
-              <Route path="assignments/:id" element={<AssignmentDetails />} />
-              <Route path="assessments" element={<TeacherAssessments />} />
-              <Route path="assessments/:id" element={<AssessmentsMarksEntry />} />
-              <Route path="attendance" element={<MarkAttendance />} />
-              <Route path="attendance/:id" element={<MarkAttendance />} />
-              <Route path="students" element={<TeacherStudents />} />
-              <Route path="students/:id" element={<TeacherStudentDetails />} />
-              <Route path="timetable" element={<TeacherTimetable />} />
-              <Route path="profile" element={<TeacherProfile />} />
-            </Route>
+          <Route
+            path="/teacher"
+            element={
+              <ProtectedRoutes allowedRoles={["teacher"]}>
+                <TeacherLayout />
+              </ProtectedRoutes>
+            }
+          >
+            <Route index element={<TeacherDashboard />} />
+            <Route path="students" element={<TeacherStudents />} />
+            <Route path="assessments" element={<TeacherAssessments />} />
+            <Route path="assessments/:assessment_id/marks" element={<TeacherMarksEntry />} />
+            <Route path="results" element={<TeacherResults />} />
+            <Route path="attendance" element={<TeacherAttendance />} />
+            <Route path="timetable" element={<TeacherTimetable />} />
+            <Route path="reports" element={<TeacherReports />} />
+            <Route path="profile" element={<TeacherProfile />} />
           </Route>
+
+          
 
           {/* Optional General Redirect */}
           <Route path="/dashboard" element={<Navigate to="/parent" replace />} />

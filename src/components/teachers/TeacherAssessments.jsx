@@ -1,241 +1,214 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/api";
 
+const Spinner = () => (
+  <div className="flex justify-center items-center h-80">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-3 border-green-600"></div>
+  </div>
+);
+
+const ButtonSpinner = () => (
+  <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+);
 
 const TeacherAssessments = () => {
-    const [assessments, setAssessments] = useState([]);
-    const [search, setSearch] = useState("");
+  const [classes, setClasses] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [assessments, setAssessments] = useState([]);
+  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ name: "", assessment_type: "", max_score: 50 });
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-
-    const fetchAssessments = async () => {
-        setLoading(true);
-        setError("");
-
-        try {
-            const response = await api.get(
-                "/dashboard/teacher/assessments/"
-            );
-
-            setAssessments(response.data);
-        } catch (err) {
-            console.error(err);
-            setError("Unable to load assessments.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchAssessments();
-    }, []);
-
-    const filteredAssessments = useMemo(() => {
-        return assessments.filter((assessment) =>
-            `${assessment.assessment_type} ${assessment.subject} ${assessment.classroom}`
-                .toLowerCase()
-                .includes(search.toLowerCase())
-        );
-    }, [assessments, search]);
-
-    if (loading) {
-        return (
-            <div className="flex justify-center py-5">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-        );
+  const fetchBasics = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const { data } = await api.get("dashboard/teacher/");
+      setClasses(Array.isArray(data?.classes) ? data.classes : []);
+      setSubjects(Array.isArray(data?.subjects) ? data.subjects : []);
+    } catch (err) {
+      console.error("Basics error:", err);
+      setError("Failed to load data.");
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
-    if (error) {
-        return (
-            <div className="bg-white rounded-xl shadow">
-                <div className="text-center py-10 px-6">
-
-                    <i className="bi bi-exclamation-circle text-red-500 text-4xl"></i>
-
-                    <h5 className="mt-3 font-bold">
-                        Failed to Load Assessments
-                    </h5>
-
-                    <p className="text-gray-500 text-sm">
-                        {error}
-                    </p>
-
-                    <button
-                        className="mt-3 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700 transition"
-                        onClick={fetchAssessments}
-                    >
-                        Retry
-                    </button>
-
-                </div>
-            </div>
-        );
+  const fetchAssessments = useCallback(async () => {
+    if (!selectedClass || !selectedSubject) {
+      setAssessments([]);
+      return;
     }
+    try {
+      setLoading(true);
+      const { data } = await api.get(
+        `results/assessments/?class_id=${selectedClass}&subject_id=${selectedSubject}`
+      );
+      setAssessments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Assessments error:", err);
+      setError("Failed to load assessments.");
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedClass, selectedSubject]);
 
-    return (
-        <>
-            {/* Header */}
-            <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+  const createAssessment = async (e) => {
+    e.preventDefault();
+    if (!selectedClass || !selectedSubject || !formData.name) return;
+    try {
+      setSaving(true);
+      setError("");
+      await api.post("results/assessments/", {
+        class_id: selectedClass,
+        subject_id: selectedSubject,
+        name: formData.name,
+        assessment_type: formData.assessment_type,
+        max_score: Number(formData.max_score)
+      });
+      setFormData({ name: "", assessment_type: "", max_score: 50 });
+      setShowForm(false);
+      fetchAssessments();
+    } catch (err) {
+      console.error("Create error:", err);
+      setError("Failed to create assessment.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  useEffect(() => { fetchBasics(); }, [fetchBasics]);
+  useEffect(() => { fetchAssessments(); }, [fetchAssessments]);
+
+  if (loading && classes.length === 0) return <Spinner />;
+
+  return (
+    <div className="p-4 md:p-6 space-y-6 bg-gray-50 min-h-screen">
+      <div className="card">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-800">Assessments & Marks</h1>
+        <p className="text-gray-500 mt-1 text-sm">Create assessments and enter student marks</p>
+      </div>
+
+      {error && (
+        <div className="card bg-red-50 border border-red-200 text-red-700 p-4">{error}</div>
+      )}
+
+      {/* Filters */}
+      <div className="card grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="form-lable">Select Class</label>
+          <select
+            className="milk-input"
+            value={selectedClass}
+            onChange={(e) => setSelectedClass(e.target.value)}
+          >
+            <option value="">-- Choose Class --</option>
+            {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="form-lable">Select Subject</label>
+          <select
+            className="milk-input"
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
+          >
+            <option value="">-- Choose Subject --</option>
+            {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* Add New Assessment */}
+      {selectedClass && selectedSubject && (
+        <div className="card">
+          {!showForm ? (
+            <button className="milk-btn" onClick={() => setShowForm(true)}>
+              + Create New Assessment
+            </button>
+          ) : (
+            <form onSubmit={createAssessment} className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800">New Assessment</h3>
+              <div>
+                <label className="form-lable">Assessment Name</label>
+                <input
+                  type="text"
+                  className="milk-input"
+                  placeholder="e.g. End of Term Exam"
+                  value={formData.name}
+                  onChange={(e) => setFormData(p => ({...p, name: e.target.value}))}
+                  required
+                />
+              </div>
+              <div>
+                <label className="form-lable">Type</label>
+                <select
+                  className="milk-input"
+                  value={formData.assessment_type}
+                  onChange={(e) => setFormData(p => ({...p, assessment_type: e.target.value}))}
+                >
+                  <option value="">-- Select Type --</option>
+                  <option value="exam">Exam</option>
+                  <option value="test">Test</option>
+                  <option value="assignment">Assignment</option>
+                </select>
+              </div>
+              <div>
+                <label className="form-lable">Maximum Score</label>
+                <input
+                  type="number"
+                  className="milk-input"
+                  value={formData.max_score}
+                  onChange={(e) => setFormData(p => ({...p, max_score: e.target.value}))}
+                  min="1"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button type="button" className="bg-gray-200 text-gray-800 px-4 py-3 rounded-lg font-medium hover:bg-gray-300" onClick={() => setShowForm(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="milk-btn" disabled={saving}>
+                  {saving && <ButtonSpinner />} Save
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      )}
+
+      {/* Assessment List */}
+      <div className="card">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Assessments</h2>
+        {!selectedClass || !selectedSubject ? (
+          <p className="text-gray-500 text-center py-8">Select class and subject to view assessments.</p>
+        ) : assessments.length === 0 ? (
+          <p className="text-gray-500 text-center py-8">No assessments found.</p>
+        ) : (
+          <div className="space-y-3">
+            {assessments.map(a => (
+              <div key={a.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
                 <div>
-                    <h3 className="font-bold text-lg mb-1">
-                        My Assessments
-                    </h3>
-                    <p className="text-gray-500 text-sm">
-                        Create and manage classroom assessments.
-                    </p>
+                  <h4 className="font-semibold text-gray-800">{a.name}</h4>
+                  <p className="text-sm text-gray-500 capitalize">{a.assessment_type} • Max: {a.max_score}</p>
                 </div>
-                <div className="flex gap-2">
-                    <button
-                        className="border border-blue-600 text-blue-600 rounded-lg px-4 py-2 text-sm hover:bg-blue-50 transition"
-                        onClick={fetchAssessments}
-                    >
-                        <i className="bi bi-arrow-clockwise mr-2"></i>
-                        Refresh
-                    </button>
-
-                    <Link
-                        to="/teacher/assessments/create"
-                        className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700 transition"
-                    >
-                        <i className="bi bi-plus-circle mr-2"></i>
-                        Create Assessment
-                    </Link>
-                </div>
-            </div>
-
-            {/* Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="bg-white rounded-xl shadow p-4 text-center">
-                    <i className="bi bi-journal-check text-blue-600 text-3xl"></i>
-                    <h3 className="font-bold text-xl mt-2">
-                        {assessments.length}
-                    </h3>
-                    <span className="text-xs text-gray-500">
-                        Total Assessments
-                    </span>
-                </div>
-                <div className="bg-white rounded-xl shadow p-4 text-center">
-                    <i className="bi bi-calendar-event text-green-600 text-3xl"></i>
-                    <h3 className="font-bold text-xl mt-2">
-                        {
-                            assessments.filter(
-                                (a) => a.term === "Term 1"
-                            ).length
-                        }
-                    </h3>
-                    <span className="text-xs text-gray-500">
-                        Current Term
-                    </span>
-                </div>
-
-                <div className="bg-white rounded-xl shadow p-4 text-center">
-                    <i className="bi bi-building text-yellow-600 text-3xl"></i>
-                    <h3 className="font-bold text-xl mt-2">
-                        {
-                            new Set(
-                                assessments.map((a) => a.classroom)
-                            ).size
-                        }
-                    </h3>
-                    <span className="text-xs text-gray-500">
-                        Classes
-                    </span>
-                </div>
-            </div>
-
-            {/* Search */}
-            <div className="bg-white rounded-xl shadow mb-4">
-                <div className="p-4">
-                    <div className="flex items-center border border-gray-300 rounded-lg">
-                        <span className="px-3 text-gray-500">
-                            <i className="bi bi-search"></i>
-                        </span>
-                        <input
-                            type="text"
-                            className="w-full py-2 pr-3 text-sm focus:outline-none"
-                            placeholder="Search assessment..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            {/* Table */}
-            <div className="bg-white rounded-xl shadow overflow-x-auto">
-                    <table className="min-w-full">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="border-b px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Assessment</th>
-                                <th className="border-b px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Subject</th>
-                                <th className="border-b px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Class</th>
-                                <th className="border-b px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Term</th>
-                                <th className="border-b px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                                <th className="border-b px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                                <th className="border-b px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody className="divide-y divide-gray-200">
-                            {filteredAssessments.length > 0 ? (
-                                filteredAssessments.map((assessment) => (
-                                    <tr key={assessment.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                            {assessment.assessment_type}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {assessment.subject}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {assessment.classroom}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {assessment.term}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {assessment.assessment_date}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                {assessment.status || "Open"}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-right">
-                                            <Link
-                                                to={`/teacher/assessments/${assessment.id}`}
-                                                className="bg-blue-600 text-white rounded-lg px-3 py-1.5 text-sm hover:bg-blue-700 transition"
-                                            >
-                                                Open
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan="7"
-                                        className="text-center py-10"
-                                    >
-                                        <i className="bi bi-journal-x text-gray-400 text-4xl"></i>
-                                        <h5 className="mt-3 font-bold">
-                                            No Assessments Found
-                                        </h5>
-                                        <p className="text-gray-500 text-sm">
-                                            No assessments match your search.
-                                        </p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-            </div>
-        </>
-    );
+                <Link
+                  to={`/teacher/assessments/${a.id}/marks`}
+                  className="milk-btn whitespace-nowrap text-center"
+                >
+                  Enter Marks
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default TeacherAssessments;

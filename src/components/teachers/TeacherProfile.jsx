@@ -1,183 +1,270 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import api from "../api/api";
 
+const Spinner = () => (
+  <div className="flex justify-center items-center h-80">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-3 border-green-600"></div>
+  </div>
+);
+
+const ButtonSpinner = () => (
+  <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+);
+
 const TeacherProfile = () => {
-    const [teacher, setTeacher] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+  const [profile, setProfile] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [editMode, setEditMode] = useState(false);
 
-    useEffect(() => {
-        fetchProfile();
-    }, []);
+  // --- Password states ---
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-    const fetchProfile = async () => {
-        try {
-            const response = await api.get("/assignments/teacher-profile/");
-                setTeacher(response.data[0] || null);
-        } catch (err) {
-            console.error(err);
-            setError("Failed to load teacher profile.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="text-center mt-5">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 inline-block"></div>
-            </div>
-        );
+  const fetchProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const { data } = await api.get("assignments/teacher-profile/");
+      console.log("Raw data:", data);
+      const singleProfile = Array.isArray(data) ? data[0] : data;
+      setProfile(singleProfile || {});
+    } catch (err) {
+      console.error("Profile load error:", err.response?.data || err.message);
+      setError("Failed to load profile.");
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
-    if (error) {
-        return (
-            <div className="bg-red-100 border border-red-300 text-red-700 rounded-lg p-4">
-                {error}
-            </div>
-        );
+  const updateProfile = async (e) => {
+    e.preventDefault();
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+
+      if (!profile.id) throw new Error("Profile ID missing — cannot update");
+      console.log("Updating profile with:", profile);
+
+      await api.put(
+        `assignments/teacher-profile/${profile.id}/`,
+        profile
+      );
+
+      setSuccess("Profile updated successfully!");
+      setEditMode(false);
+    } catch (err) {
+      console.error("Update error details:", err.response?.data || err.message);
+      const serverMsg = err.response?.data ? JSON.stringify(err.response.data) : err.message;
+      setError(`Failed to update: ${serverMsg}`);
+    } finally {
+      setSaving(false);
     }
+  };
 
-    if (!teacher) {
-        return (
-            <div className="bg-yellow-100 border border-yellow-300 text-yellow-700 rounded-lg p-4">
-                No teacher profile found.
-            </div>
-        );
+  // --- Change Password Handler ---
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setError(""); setSuccess("");
+    if (newPassword !== confirmPassword) return setError("New passwords do NOT match!");
+    if (newPassword.length < 6) return setError("Password must be at least 6 characters");
+
+    try {
+      setSaving(true);
+      await api.post("auth/change-password/", {
+        old_password: oldPassword,
+        new_password: newPassword
+      });
+      setSuccess("✅ Password changed successfully!");
+      // Reset fields
+      setOldPassword(""); setNewPassword(""); setConfirmPassword("");
+      setShowChangePassword(false);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to change password. Check old password.");
+    } finally {
+      setSaving(false);
     }
+  };
 
-    return (
-        <div className="px-4">
-            <div className="bg-white rounded-xl shadow">
-                <div className="bg-blue-600 text-white rounded-t-xl px-6 py-4">
-                    <h4 className="font-bold">My Profile</h4>
-                </div>
+  // --- ✅ UPDATED Forgot Password Handler (matches accounts/password/reset/) ---
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError(""); setSuccess("");
+    try {
+      setSaving(true);
+      // ✅ Correct endpoint matching your new accounts urls
+      await api.post("accounts/password/reset/", { email: forgotEmail });
+      // django-rest-passwordreset always returns success to hide registered emails
+      setSuccess("✅ If this email is registered, check your inbox/spam for reset link!");
+      setForgotEmail("");
+      setShowForgotPassword(false);
+    } catch (err) {
+      console.error("Reset error:", err.response?.status, err.response?.data || err.message);
+      setError(
+        err.response?.data?.detail
+          ? JSON.stringify(err.response.data.detail)
+          : "Could not send reset email. Please try again later."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
 
-                <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
-                        <div className="md:col-span-3 text-center">
-                            {teacher.profile_picture ? (
-                                <img
-                                    src={teacher.profile_picture}
-                                    alt="Teacher"
-                                    className="rounded-full border-2 mx-auto"
-                                    style={{
-                                        width: "160px",
-                                        height: "160px",
-                                        objectFit: "cover",
-                                    }}
-                                />
-                            ) : (
-                                <div
-                                    className="rounded-full flex items-center justify-center mx-auto"
-                                    style={{
-                                        width: "160px",
-                                        height: "160px",
-                                        backgroundColor: "#0d6efd",
-                                        color: "#fff",
-                                        fontSize: "48px",
-                                        fontWeight: "bold",
-                                    }}
-                                >
-                                    {teacher.first_name?.charAt(0).toUpperCase()}
-                                </div>
-                            )}
-                        </div>
+  if (loading) return <Spinner />;
 
-                        <div className="md:col-span-9">
+  return (
+    <div className="p-4 md:p-6 space-y-6 bg-gray-50 min-h-screen">
+      <div className="card">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-800">My Profile</h1>
+        <p className="text-gray-500 mt-1 text-sm">View and update your personal details</p>
+      </div>
 
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full border border-gray-200">
+      {error && <div className="card bg-red-50 border border-red-200 text-red-700 p-4">{error}</div>}
+      {success && <div className="card bg-green-50 border border-green-200 text-green-700 p-4">{success}</div>}
 
-                                    <tbody className="divide-y divide-gray-200">
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50 w-1/3">Employee Number</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.employee_number}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">First Name</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.first_name}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">Last Name</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.last_name}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">Gender</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.gender}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">Date of Birth</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.date_of_birth}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">National ID</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.national_id}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">TSC Number</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.tsc_number}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">Phone Number</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.phone_number}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">Email</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.user?.email}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">Qualification</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.qualification}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">Specialization</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.specialization}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">Employment Date</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.employment_date}</td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">Status</th>
-                                            <td className="px-4 py-3 text-sm">
-                                                <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    {teacher.employment_status}
-                                                </span>
-                                            </td>
-                                        </tr>
-
-                                        <tr className="hover:bg-gray-50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider bg-gray-50">Address</th>
-                                            <td className="px-4 py-3 text-sm text-gray-900">{teacher.address}</td>
-                                        </tr>
-
-                                    </tbody>
-
-                                </table>
-                            </div>
-
-                        </div>
-
-                    </div>
-                </div>
+      {/* --- Main Profile Info --- */}
+      <div className="card">
+        {!editMode ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-500">Employee Number</p>
+                <p className="font-medium text-gray-800">{profile.employee_number || "—"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Gender</p>
+                <p className="font-medium text-gray-800 capitalize">{profile.gender || "—"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Date of Birth</p>
+                <p className="font-medium text-gray-800">{profile.date_of_birth || "—"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Qualification</p>
+                <p className="font-medium text-gray-800">{profile.qualification || "—"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">National ID</p>
+                <p className="font-medium text-gray-800">{profile.national_id || "—"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Employment Date</p>
+                <p className="font-medium text-gray-800">{profile.employment_date || "—"}</p>
+              </div>
             </div>
+            <button className="milk-btn mt-4" onClick={() => setEditMode(true)}>Edit Profile</button>
+          </div>
+        ) : (
+          <form onSubmit={updateProfile} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="form-lable">Employee Number</label>
+                <input type="text" className="milk-input" value={profile.employee_number || ""}
+                  onChange={(e) => setProfile(p => ({...p, employee_number: e.target.value}))} required />
+              </div>
+              <div>
+                <label className="form-lable">Gender</label>
+                <select className="milk-input" value={profile.gender || ""}
+                  onChange={(e) => setProfile(p => ({...p, gender: e.target.value}))} required>
+                  <option value="">-- Select --</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+              <div>
+                <label className="form-lable">Date of Birth</label>
+                <input type="date" className="milk-input" value={profile.date_of_birth || ""}
+                  onChange={(e) => setProfile(p => ({...p, date_of_birth: e.target.value}))} required />
+              </div>
+              <div>
+                <label className="form-lable">Qualification</label>
+                <input type="text" className="milk-input" value={profile.qualification || ""}
+                  onChange={(e) => setProfile(p => ({...p, qualification: e.target.value}))} required />
+              </div>
+              <div>
+                <label className="form-lable">National ID</label>
+                <input type="text" className="milk-input" value={profile.national_id || ""}
+                  onChange={(e) => setProfile(p => ({...p, national_id: e.target.value}))} required />
+              </div>
+              <div>
+                <label className="form-lable">Employment Date</label>
+                <input type="date" className="milk-input" value={profile.employment_date || ""}
+                  onChange={(e) => setProfile(p => ({...p, employment_date: e.target.value}))} required />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button type="button" className="bg-gray-200 text-gray-800 px-4 py-3 rounded-lg font-medium hover:bg-gray-300"
+                onClick={() => setEditMode(false)}>Cancel</button>
+              <button type="submit" className="milk-btn" disabled={saving}>
+                {saving && <ButtonSpinner />} Save Changes
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {/* --- CHANGE PASSWORD --- */}
+      <div className="card">
+        <button type="button" className="text-blue-600 font-medium"
+          onClick={() => { setShowChangePassword(!showChangePassword); setShowForgotPassword(false); }}>
+          {showChangePassword ? "Cancel Change Password" : "🔒 Change Password"}
+        </button>
+
+        {showChangePassword && (
+          <form onSubmit={handleChangePassword} className="mt-4 space-y-4">
+            <div>
+              <label className="form-lable">Current Password</label>
+              <input type="password" className="milk-input" value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)} required />
+            </div>
+            <div>
+              <label className="form-lable">New Password</label>
+              <input type="password" className="milk-input" value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)} required />
+            </div>
+            <div>
+              <label className="form-lable">Confirm New Password</label>
+              <input type="password" className="milk-input" value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)} required />
+            </div>
+            <button type="submit" className="milk-btn" disabled={saving}>
+              {saving && <ButtonSpinner />} Update Password
+            </button>
+          </form>
+        )}
+
+        {/* --- FORGOT PASSWORD --- */}
+        <div className="mt-3">
+          <button type="button" className="text-sm text-gray-600 underline"
+            onClick={() => { setShowForgotPassword(!showForgotPassword); setShowChangePassword(false); }}>
+            Forgot password?
+          </button>
+
+          {showForgotPassword && (
+            <form onSubmit={handleForgotPassword} className="mt-3 p-3 bg-gray-50 rounded-lg border">
+              <p className="text-sm text-gray-600 mb-2">Enter your email — we’ll send a reset link:</p>
+              <input type="email" className="milk-input mb-3" placeholder="Your email address"
+                value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} required />
+              <button type="submit" className="milk-btn" disabled={saving}>
+                {saving && <ButtonSpinner />} Send Reset Link
+              </button>
+            </form>
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default TeacherProfile;

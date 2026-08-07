@@ -10,9 +10,12 @@ const ProtectedRoutes = ({ children, allowedRoles = [] }) => {
         return <Navigate to="/login" replace />;
     }
 
-    // Logged in but wrong role → go to access denied
-    const userRole = (user.role || "").toLowerCase();
-    if (allowedRoles.length > 0 && !allowedRoles.some((r) => r.toLowerCase() === userRole)) {
+// Logged in but wrong role → go to access denied
+    // Normalize roles so underscores & hyphens are treated the same
+    // (backend may return ACADEMIC_COORDINATOR, frontend uses academic-coordinator)
+    const normalizeRole = (role) => (role || "").toLowerCase().replaceAll("_", "-");
+    const userRole = normalizeRole(user.role);
+    if (allowedRoles.length > 0 && !allowedRoles.some((r) => normalizeRole(r) === userRole)) {
         return <Navigate to="/not_authorized" replace />;
     }
 
