@@ -20,6 +20,15 @@ const AcademicCoDashboard = () => {
     loadDashboard();
   }, []);
 
+  // Helper: get correct count from ANY response (paginated or plain array)
+  const getCount = (res) => {
+    const data = res.data;
+    if (data?.count) return data.count; // prefer DRF total count
+    if (Array.isArray(data)) return data.length; // plain array
+    if (Array.isArray(data?.results)) return data.results.length; // paginated fallback length
+    return 0;
+  };
+
   const loadDashboard = async () => {
     try {
       const [
@@ -43,14 +52,14 @@ const AcademicCoDashboard = () => {
       ]);
 
       setStats({
-        students: students.data.count || students.data.length,
-        teachers: teachers.data.count || teachers.data.length,
-        subjects: subjects.data.count || subjects.data.length,
-        classes: classes.data.count || classes.data.length,
-        assessments: assessments.data.count || assessments.data.length,
-        pendingResults: pendingResults.data.count || pendingResults.data.length,
-        approvedResults: approvedResults.data.count || approvedResults.data.length,
-        timetables: timetable.data.count || timetable.data.length,
+        students: getCount(students),
+        teachers: getCount(teachers),
+        subjects: getCount(subjects),
+        classes: getCount(classes),
+        assessments: getCount(assessments),
+        pendingResults: getCount(pendingResults),
+        approvedResults: getCount(approvedResults),
+        timetables: getCount(timetable),
       });
     } catch (err) {
       console.error("Failed to load dashboard:", err);
@@ -59,7 +68,6 @@ const AcademicCoDashboard = () => {
     }
   };
 
-  // Stat cards — no icons, using your stat-card/stat-value classes
   const cards = [
     { title: "Total Students", value: stats.students },
     { title: "Assigned Teachers", value: stats.teachers },
@@ -83,7 +91,6 @@ const AcademicCoDashboard = () => {
 
   return (
     <div className="space-y-8">
-      {/* Page Header */}
       <div>
         <h1 className="text-[clamp(1.5rem,3vw,2.2rem)] font-bold text-gray-800">
           Academic Coordinator Dashboard
@@ -93,7 +100,6 @@ const AcademicCoDashboard = () => {
         </p>
       </div>
 
-      {/* Stats Grid — using your stat-card & stat-value */}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {cards.map((card) => (
           <div key={card.title} className="stat-card py-6">
@@ -103,7 +109,6 @@ const AcademicCoDashboard = () => {
         ))}
       </div>
 
-      {/* Quick Actions — using card & milk-btn classes */}
       <div className="grid md:grid-cols-3 gap-6">
         <div className="card">
           <h2 className="font-semibold text-lg mb-3 text-gray-800">Manage Classes & Subjects</h2>

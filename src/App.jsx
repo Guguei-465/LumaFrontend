@@ -75,6 +75,8 @@ import GradeScales from "./components/academiccoordinator/GradeScales";
 import ReportComments from "./components/academiccoordinator/ReportComments";
 import ResultSubmissions from "./components/academiccoordinator/ResultSubmissions";
 import StudentResults from "./components/academiccoordinator/StudentResults";
+import Attendance from "./components/academiccoordinator/Attendance";
+import MarkAttendanceCoordinator from "./components/academiccoordinator/MarkAttendanceCoordinator";
 
 function App() {
   return (
@@ -135,7 +137,9 @@ function App() {
             <Route index element={<AcademicCoDashboard />} />
             <Route path="students" element={<StudentsAcademic />} />
             <Route path="subjects" element={<SubjectsAcademic />} />
-<Route path="assessments" element={<Assessments />} />
+            <Route path="attendance" element={<Attendance />} />
+            <Route path="attendance/mark" element={<MarkAttendanceCoordinator/>} />
+            <Route path="assessments" element={<Assessments />} />
             <Route path="timetable" element={<Timetable />} />
             <Route path="timetable/create" element={<TimetableForm />} />
             <Route path="result-submissions" element={<ResultSubmissions />} />

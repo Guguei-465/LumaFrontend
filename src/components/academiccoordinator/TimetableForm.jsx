@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/api";
 
 const TimetableForm = () => {
-  const { id } = useParams(); // /create = no id = ADD; /:id = EDIT
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -12,14 +12,11 @@ const TimetableForm = () => {
     day: "",
     start_time: "",
     end_time: "",
-    class_assigned: "",
-    subject: "",
-    teacher: ""
+    assignment: ""
   });
 
-  const [classes, setClasses] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [teachers, setTeachers] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [terms, setTerms] = useState([]);      
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -32,33 +29,38 @@ const TimetableForm = () => {
     { value: "SAT", label: "Saturday" }
   ];
 
-  // Load supporting data + existing entry if editing
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [classesRes, subjRes, teachRes] = await Promise.all([
-          api.get("classes/"),
-          api.get("subjects/"),
-          api.get("users/teachers/") // adjust endpoint to match yours
-        ]);
-        setClasses(classesRes.data.results || classesRes.data);
-        setSubjects(subjRes.data.results || subjRes.data);
-        setTeachers(teachRes.data.results || teachRes.data);
+        // 1. Load Assignments
+        const assignRes = await api.get("assignments/");
+        setAssignments(assignRes.data.results || assignRes.data);
 
-        // If editing, load existing timetable entry
+        // Load unique terms from backend timetable data
+        const timeTableRes = await api.get("timetable/");
+        // Extract unique, trimmed, non-empty terms + format like days array
+        const uniqueTerms = [
+          ...new Set(
+            timeTableRes.data
+              .map(item => item.term?.trim())
+              .filter(term => term)
+          )
+        ].sort(); // optional: alphabetical sort for cleaner list
+        setTerms(uniqueTerms);
+
+        // 2. If EDIT: load existing data
         if (id) {
           const res = await api.get(`timetable/${id}/`);
           setFormData({
-            academic_year: res.data.academic_year,
-            term: res.data.term,
-            day: res.data.day,
-            start_time: res.data.start_time,
-            end_time: res.data.end_time,
-            class_assigned: res.data.class_assigned,
-            subject: res.data.subject,
-            teacher: res.data.teacher
+            academic_year: res.data.academic_year || "",
+            term: res.data.term?.trim() || "",
+            day: res.data.day || "",
+            start_time: res.data.start_time || "",
+            end_time: res.data.end_time || "",
+            assignment: res.data.assignment || ""
           });
         }
+
       } catch (err) {
         console.error("Failed to load form data:", err);
         setError("Could not load required data.");
@@ -72,7 +74,7 @@ const TimetableForm = () => {
   };
 
   const validateTimes = () => {
-    return formData.start_time < formData.end_time;
+    return formData.start_time && formData.end_time && formData.start_time < formData.end_time;
   };
 
   const handleSubmit = async (e) => {
@@ -87,17 +89,30 @@ const TimetableForm = () => {
     }
 
     try {
+      const payload = {
+        academic_year: formData.academic_year.trim(),
+        term: formData.term,
+        day: formData.day,
+        start_time: formData.start_time.length === 5 ? formData.start_time + ":00" : formData.start_time,
+        end_time: formData.end_time.length === 5 ? formData.end_time + ":00" : formData.end_time,
+        assignment: formData.assignment,
+        is_active: true
+      };
+
       if (id) {
-        // UPDATE existing
-        await api.put(`timetable/${id}/`, formData);
+        await api.put(`timetable/update/${id}/`, payload);
       } else {
-        // CREATE new
-        await api.post("timetable/", formData);
+        await api.post("timetable/create/", payload);
       }
-      navigate("/academic-coordinator/timetable"); // go back to list
+      navigate("/academic-coordinator/timetable");
     } catch (err) {
       console.error("Save failed:", err);
-      setError(err.response?.data?.detail || "Failed to save timetable entry. Check for time clashes!");
+      console.error("Backend errors:", err.response?.data);
+      setError(
+        err.response?.data
+          ? `Error: ${JSON.stringify(err.response.data)}`
+          : "Failed to save — check fields or overlapping time!"
+      );
     } finally {
       setLoading(false);
     }
@@ -115,9 +130,9 @@ const TimetableForm = () => {
             {id ? "Update schedule details" : "Add new lesson/period to timetable"}
           </p>
         </div>
-        <button 
-          type="button" 
-          onClick={() => navigate(-1)} 
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
           className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
         >
           Cancel
@@ -149,18 +164,27 @@ const TimetableForm = () => {
               />
             </div>
 
-            {/* Term */}
+            {/* ✅ TERM SELECT — MATCHES DAYS EXACT STYLE/STRUCTURE */}
             <div>
               <label className="form-lable">Term <span className="text-red-500">*</span></label>
-              <input
-                type="text"
+              <select
                 name="term"
-                placeholder="e.g Term 1"
                 value={formData.term}
                 onChange={handleChange}
                 className="milk-input"
                 required
-              />
+              >
+                <option value="">-- Select Term --</option>
+                {terms.length > 0 ? (
+                  terms.map((termVal, idx) => (
+                    <option key={idx} value={termVal}>
+                      {termVal}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>-- No terms found --</option>
+                )}
+              </select>
             </div>
 
             {/* Day */}
@@ -180,56 +204,23 @@ const TimetableForm = () => {
               </select>
             </div>
 
-            {/* Class */}
-            <div>
-              <label className="form-lable">Class / Grade <span className="text-red-500">*</span></label>
+            {/* Assignment (Class + Subject + Teacher) */}
+            <div className="md:col-span-2">
+              <label className="form-lable">Assignment <span className="text-red-500">*</span></label>
               <select
-                name="class_assigned"
-                value={formData.class_assigned}
+                name="assignment"
+                value={formData.assignment}
                 onChange={handleChange}
                 className="milk-input"
                 required
+                disabled={assignments.length === 0}
               >
-                <option value="">-- Select Class --</option>
-                {classes.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} {c.stream || ""}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Subject */}
-            <div>
-              <label className="form-lable">Subject <span className="text-red-500">*</span></label>
-              <select
-                name="subject"
-                value={formData.subject}
-                onChange={handleChange}
-                className="milk-input"
-                required
-              >
-                <option value="">-- Select Subject --</option>
-                {subjects.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Teacher */}
-            <div>
-              <label className="form-lable">Assigned Teacher <span className="text-red-500">*</span></label>
-              <select
-                name="teacher"
-                value={formData.teacher}
-                onChange={handleChange}
-                className="milk-input"
-                required
-              >
-                <option value="">-- Select Teacher --</option>
-                {teachers.map(t => (
-                  <option key={t.id} value={t.id}>
-                    {t.first_name} {t.last_name}
+                <option value="">
+                  {assignments.length === 0 ? "No assignments available" : "-- Select Assignment --"}
+                </option>
+                {assignments.map(a => (
+                  <option key={a.id} value={a.id}>
+                    {a.classroom_name || `${a.classroom?.grade} ${a.classroom?.stream}`} — {a.subject_name || a.subject?.name} — {a.teacher_name || `${a.teacher?.user?.first_name} ${a.teacher?.user?.last_name}`}
                   </option>
                 ))}
               </select>
@@ -264,8 +255,8 @@ const TimetableForm = () => {
 
           {/* Submit Button */}
           <div className="flex justify-end pt-4 border-t">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="milk-btn min-w-[150px]"
               disabled={loading}
             >

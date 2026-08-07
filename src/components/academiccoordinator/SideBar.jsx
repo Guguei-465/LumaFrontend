@@ -82,6 +82,13 @@ const SideBar = ({ isOpen, setIsOpen }) => {
               <i className="bi bi-calendar3 text-lg"></i>
               Timetable
             </NavLink>
+             <NavLink 
+              to="/academic-coordinator/attendance" 
+              className={linkClass} 
+              onClick={() => setIsOpen(false)}
+            >
+              <i className="bi bi-clipboard-check"></i> Student Attendance
+            </NavLink>
 
             {/* Results & Grading */}
             <p className={sectionHeading}>Results & Grading</p>

@@ -1,31 +1,45 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/api";
+
+// Always return an array from API responses (handles paginated & non-paginated formats)
+const toArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.results)) return data.results;
+  return [];
+};
 
 const ResultSubmissions = () => {
   const [results, setResults] = useState([]);
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterExam, setFilterExam] = useState("all");
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
+    setLoading(true);
+    setError("");
     try {
       const [resRes, examRes] = await Promise.all([
         api.get("results/"),
         api.get("exams/")
       ]);
-      setResults(resRes.data.results || resRes.data);
-      setExams(examRes.data.results || examRes.data);
+      setResults(toArray(resRes.data));
+      setExams(toArray(examRes.data));
     } catch (err) {
       console.error("Failed to load result submissions:", err);
+      setError("Could not load result submissions. Please try again.");
+      // Don't leave the page blank — reset to empty arrays
+      setResults([]);
+      setExams([]);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const approveResult = async (id) => {
     try {
@@ -72,10 +86,17 @@ const ResultSubmissions = () => {
         <h1 className="text-[clamp(1.5rem,3vw,2.2rem)] font-bold text-gray-800">
           Result Submissions
         </h1>
-        <p className="text-gray-500 mt-2">
+<p className="text-gray-500 mt-2">
           Review submitted marks, verify accuracy & approve or reject
         </p>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="p-4 rounded-lg bg-red-100 text-red-700">
+          {error}
+        </div>
+      )}
 
       {/* Search & Filter Bar */}
       <div className="card">

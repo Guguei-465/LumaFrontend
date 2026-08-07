@@ -31,7 +31,7 @@ const TeacherProfile = () => {
     try {
       setLoading(true);
       setError("");
-      const { data } = await api.get("assignments/teacher-profile/");
+      const { data } = await api.get("accounts/teacher-profile/");
       console.log("Raw data:", data);
       const singleProfile = Array.isArray(data) ? data[0] : data;
       setProfile(singleProfile || {});
@@ -82,7 +82,7 @@ const TeacherProfile = () => {
         old_password: oldPassword,
         new_password: newPassword
       });
-      setSuccess("✅ Password changed successfully!");
+      setSuccess("Password changed successfully!");
       // Reset fields
       setOldPassword(""); setNewPassword(""); setConfirmPassword("");
       setShowChangePassword(false);
@@ -93,16 +93,16 @@ const TeacherProfile = () => {
     }
   };
 
-  // --- ✅ UPDATED Forgot Password Handler (matches accounts/password/reset/) ---
+  // --- UPDATED Forgot Password Handler (matches accounts/password/reset/) ---
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setError(""); setSuccess("");
     try {
       setSaving(true);
-      // ✅ Correct endpoint matching your new accounts urls
+      // Correct endpoint matching your new accounts urls
       await api.post("accounts/password/reset/", { email: forgotEmail });
       // django-rest-passwordreset always returns success to hide registered emails
-      setSuccess("✅ If this email is registered, check your inbox/spam for reset link!");
+      setSuccess("If this email is registered, check your inbox/spam for reset link!");
       setForgotEmail("");
       setShowForgotPassword(false);
     } catch (err) {

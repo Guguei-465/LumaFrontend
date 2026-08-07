@@ -18,3 +18,10 @@
 - [x] Create `ReportComments.jsx` and wire up `/academic-coordinator/report-comments`
 - [x] Verified build succeeds
 
+# ResultSubmissions Component Corrections
+
+- [x] Removed unused `React` import
+- [x] Fixed function declaration order (loadData before useEffect)
+- [x] Confirmed sidebar link & route are correctly wired
+- [x] Verified build succeeds
+
