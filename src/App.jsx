@@ -27,12 +27,8 @@ import Reports from "./components/admin/Reports";
 import AdminProfile from "./components/admin/AdminProfile";
 import AccountantLayout from "./components/accountant/AccountantLayout";
 import AccountantDashboard from "./components/accountant/AccountantDashboard";
-import AccountantNotice from "./components/accountant/AccountantNotices";
-import FeeStructures from "./components/accountant/FeeStrutures";
-import StudentFees from "./components/accountant/StudentFees";
-import FeePayments from "./components/accountant/FeePayment";
-import FinanceReport from "./components/accountant/FinaceReport";
 import AccountantProfile from "./components/accountant/AccountantProfile";
+import AccountantNotice from "./components/accountant/AccountantNotices";
 import ParentDashboard from "./components/parents/ParentDashboard";
 import MyChildren from "./components/parents/MyChildren";
 import ParentAttendance from "./components/parents/ParentAttendance";
@@ -77,6 +73,15 @@ import ResultSubmissions from "./components/academiccoordinator/ResultSubmission
 import StudentResults from "./components/academiccoordinator/StudentResults";
 import Attendance from "./components/academiccoordinator/Attendance";
 import MarkAttendanceCoordinator from "./components/academiccoordinator/MarkAttendanceCoordinator";
+import StudentLedger from "./components/accountant/StudentLedger";
+import SentNotices from "./components/accountant/SentNotices";
+import RecordPayment from "./components/accountant/RecordPayment";
+import ReceiptGenerator from "./components/accountant/ReceiptGenerator";
+import PendingFees from "./components/accountant/PendingFees";
+import FinancialReports from "./components/accountant/FinancialReports";
+import FeesDashboard from "./components/accountant/FeesDashboard";
+import FeeRecords from "./components/accountant/FeeRecords";
+import ExpenseManager from "./components/accountant/ExpenseManager";
 
 function App() {
   return (
@@ -151,15 +156,27 @@ function App() {
           </Route>
 
           {/* ================= ACCOUNTANT ================= */}
-          <Route path="/accountant" element={<AccountantLayout />}>
+          <Route
+            path="/accountant"
+            element={
+              <ProtectedRoutes allowedRoles={["accountant"]}>
+                <AccountantLayout />
+              </ProtectedRoutes>
+            }
+          >
             <Route index element={<AccountantDashboard />} />
-            <Route path="students" element={<StudentsAcademic />} />
+            <Route path="dashboard" element={<AccountantDashboard />} />
             <Route path="notices" element={<AccountantNotice />} />
-            <Route path="fee-structures" element={<FeeStructures />} />
-            <Route path="student-fees" element={<StudentFees />} />
-            <Route path="fee-payments" element={<FeePayments />} />
-            <Route path="reports" element={<FinanceReport />} />
             <Route path="profile" element={<AccountantProfile />} />
+            <Route path="expenses" element={<ExpenseManager />} />
+            <Route path="fee-records" element={<FeeRecords />} />
+            <Route path="fees-dashboard" element={<FeesDashboard />} />
+            <Route path="financial-reports" element={<FinancialReports />} />
+            <Route path="pending-fees" element={<PendingFees />} />
+            <Route path="receipt-generator" element={<ReceiptGenerator />} />
+            <Route path="record-payment" element={<RecordPayment />} />
+            <Route path="sent-notices" element={<SentNotices />} />
+            <Route path="student-ledger" element={<StudentLedger />} />
           </Route>
 
 {/* ================= PARENT (Fixed & Protected) ================= */}

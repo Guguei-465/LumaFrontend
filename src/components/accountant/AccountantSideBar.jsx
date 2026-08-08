@@ -5,8 +5,8 @@ const AccountantSideBar = ({ isOpen, setIsOpen }) => {
   const linkClass = ({ isActive }) =>
     `flex items-center gap-4 px-3 py-3 rounded-lg transition ${
       isActive
-        ? "bg-green-600 text-white"
-        : "text-gray-200 hover:bg-white/10"
+        ? "bg-yellow-600 text-white shadow-md"
+        : "text-yellow-900 hover:bg-yellow-200/60 hover:text-white"
     }`;
 
   return (
@@ -19,45 +19,50 @@ const AccountantSideBar = ({ isOpen, setIsOpen }) => {
       )}
 
       <aside
-        className={`fixed md:static z-50 top-0 left-0 h-full w-64 bg-gradient-to-br from-green-800 to-blue-900 text-white transform transition-transform duration-300 ${
+        className={`fixed md:static z-50 top-0 left-0 h-full w-64 bg-gradient-to-br from-yellow-900 to-yellow-500 text-black transform transition-transform duration-300 ${
           isOpen
             ? "translate-x-0"
             : "-translate-x-full md:translate-x-0"
         }`}
       >
         <div className="p-5">
-          <h2 className="text-2xl font-bold mb-8">
+          <h2 className="text-2xl font-bold mb-8 text-yellow-950">
             Luma 2000 Academy
           </h2>
 
           <nav className="space-y-2">
             <NavLink to="/accountant" end className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-speedometer2"></i>
-              Dashboard
+              <i className="bi bi-speedometer2"></i> Dashboard
             </NavLink>
-            <NavLink to="/accountant/fee-structures" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-cash-stack"></i>
-              Fee Structures
+            <NavLink to="/accountant/fee-records" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-journal-text"></i> Fee Records
             </NavLink>
-            <NavLink to="/accountant/student-fees" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-people-fill"></i>
-              Student Fees
+            <NavLink to="/accountant/record-payment" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-currency-exchange"></i> Record Payment
             </NavLink>
-            <NavLink to="/accountant/fee-payments" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-credit-card-fill"></i>
-              Fee Payments
+            <NavLink to="/accountant/pending-fees" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-clock-history"></i> Pending Fees
+            </NavLink>
+            <NavLink to="/accountant/student-ledger" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-book"></i> Student Ledger
+            </NavLink>
+            <NavLink to="/accountant/receipt-generator" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-receipt"></i> Receipt Generator
+            </NavLink>
+            <NavLink to="/accountant/expenses" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-wallet2"></i> Expense Manager
+            </NavLink>
+            <NavLink to="/accountant/financial-reports" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-bar-chart-fill"></i> Financial Reports
             </NavLink>
             <NavLink to="/accountant/notices" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-megaphone-fill"></i>
-              Fee Notices
+              <i className="bi bi-megaphone-fill"></i> Send Fee Notice
             </NavLink>
-            <NavLink to="/accountant/reports" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-bar-chart-fill"></i>
-              Financial Reports
+            <NavLink to="/accountant/sent-notices" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-send-check"></i> Sent Notices
             </NavLink>
             <NavLink to="/accountant/profile" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-person-fill"></i>
-              My Profile
+              <i className="bi bi-person-fill"></i> My Profile
             </NavLink>
           </nav>
         </div>
