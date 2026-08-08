@@ -17,20 +17,36 @@ const SentNotices = () => {
   const [filterTarget, setFilterTarget] = useState("all");
   const [viewItem, setViewItem] = useState(null);
 
-  // ✅ WORKS WITH YOUR DIRECT ARRAY RESPONSE
+// ✅ Fetch ALL pages (handles backend pagination)
   const fetchItems = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-      const res = await api.get("anouncements/");
-      console.log("📥 Raw API Response:", res);
+      const allItems = [];
+      let nextUrl = "anouncements/";
 
-      // ✅ KEY FIX: use res.data directly (it's already an array!)
-      const listData = Array.isArray(res.data) ? res.data : res.data.results || [];
-      console.log("✅ Final Announcement List:", listData);
+      while (nextUrl) {
+        const res = await api.get(nextUrl);
+        const pageData = res.data;
 
-      setAnnouncements(listData);
-      setFilteredAnnouncements(listData);
+        // Support both direct-array and paginated (results) responses
+        if (Array.isArray(pageData)) {
+          allItems.push(...pageData);
+          break; // direct array → no more pages
+        } else {
+          if (Array.isArray(pageData.results)) {
+            allItems.push(...pageData.results);
+          }
+          nextUrl = pageData.next ? pageData.next.replace(
+            "https://ryacksonfungo.alwaysdata.net/api/",
+            ""
+          ) : null;
+        }
+      }
+
+      console.log("✅ Final Announcement List (all pages):", allItems);
+      setAnnouncements(allItems);
+      setFilteredAnnouncements(allItems);
     } catch (err) {
       console.error("❌ Load Error:", err);
       setError("Could not load history. Check your connection.");

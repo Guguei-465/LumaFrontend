@@ -22,18 +22,19 @@ const AccountantNotice = () => {
   useEffect(() => {
     const fetchParents = async () => {
       try {
-        console.log("📡 Fetching parents from: parents/");
+        console.log("Fetching parents from: parents/");
         const res = await api.get("parents/");
-        console.log("✅ Parents API raw response:", res);
+        console.log(res)
+  
 
         const parentList = Array.isArray(res.data) 
           ? res.data 
           : res.data?.results || [];
 
-        console.log("✅ Parsed parent list:", parentList);
+        console.log("Parsed parent list:", parentList);
         setParents(parentList);
       } catch (err) {
-        console.error("❌ Failed to load parents:", err);
+        console.error("Failed to load parents:", err);
         setError("Could not load parent list. Check API endpoint.");
       }
     };
