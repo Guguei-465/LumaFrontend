@@ -1,13 +1,11 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 
-const AdminSidebar = ({ isOpen, setIsOpen }) => {
-
+const AdminSideBar = ({ isOpen, setIsOpen }) => {
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-4 px-3 py-2 rounded-lg transition ${
+    `flex items-center gap-4 px-3 py-3 rounded-lg transition ${
       isActive
-        ? "bg-green-600 text-white"
-        : "text-gray-200 hover:bg-white/10"
+        ? "bg-teal-600 text-white shadow-md"
+        : "text-teal-950 hover:bg-teal-200/60 hover:text-teal-900"
     }`;
 
   return (
@@ -20,89 +18,90 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       )}
 
       <aside
-        className={`fixed md:static z-50 top-0 left-0 h-full w-64 bg-gradient-to-br from-blue-800 to-blue-900 text-white transform transition-transform duration-300 ${
-          isOpen
-            ? "translate-x-0"
-            : "-translate-x-full md:translate-x-0"
+        className={`fixed md:static z-50 top-0 left-0 h-full w-64 bg-gradient-to-br from-teal-900 to-teal-500 text-black transform transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-
         <div className="p-5">
-
-          <h2 className="text-2xl font-bold mb-8">
+          <h2 className="text-2xl font-bold mb-2 text-teal-950">
             Luma 2000 Academy
           </h2>
+          <p className="text-xs font-semibold text-teal-900 mb-6 uppercase tracking-wide">
+            Admin Panel
+          </p>
 
           <nav className="space-y-2">
-
-            <NavLink to="/admin" end className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-speedometer2"></i>
-              Dashboard
-            </NavLink>
-            <NavLink to="/admin/register-user" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-person-plus-fill"></i>
-              Register User
-            </NavLink>
-            <NavLink to="/admin/register-student" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-person-vcard-fill"></i>
-              Register Student
-            </NavLink>
-            <NavLink to="/admin/users" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-people-fill"></i>
-              Users
-            </NavLink>
-            <NavLink to="/admin/teachers" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-person-workspace"></i>
-              Teachers
-            </NavLink>
-            <NavLink to="/admin/parents" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-people"></i>
-              Parents
-            </NavLink>
-            <NavLink to="/admin/students" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-mortarboard-fill"></i>
-              Students
-            </NavLink>
-            <NavLink to="/admin/classes" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-building"></i>
-              Classes
-            </NavLink>
-            <NavLink to="/admin/subjects" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-book-fill"></i>
-              Subjects
-            </NavLink>
-            <NavLink to="/admin/timetable" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-calendar3"></i>
-              Timetable
-            </NavLink>
-            <NavLink to="/admin/announcements" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-megaphone-fill"></i>
-              Announcements
-            </NavLink>
-            <NavLink to="/admin/fees" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-cash-stack"></i>
-              Fee Structures
-            </NavLink>
-            <NavLink to="/admin/payments" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-credit-card-fill"></i>
-              Payments
-            </NavLink>
-            <NavLink to="/admin/reports" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-file-earmark-bar-graph-fill"></i>
-              Reports
-            </NavLink>
-            <NavLink to="/admin/profile" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-person-circle"></i>
-              My Profile
+            <NavLink to="/admin-dashboard" end className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-speedometer2"></i> Dashboard
             </NavLink>
 
+            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">Students</p>
+            <NavLink to="/admin-dashboard/students" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-people-fill"></i> Students List
+            </NavLink>
+            <NavLink to="/admin-dashboard/students/add" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-person-plus-fill"></i> Register Student
+            </NavLink>
+
+            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">Teachers</p>
+            <NavLink to="/admin-dashboard/teachers" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-person-workspace"></i> Teachers List
+            </NavLink>
+            <NavLink to="/admin-dashboard/teachers/add" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-person-plus-fill"></i> Add Teacher
+            </NavLink>
+
+            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">Parents</p>
+            <NavLink to="/admin-dashboard/parents" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-people-fill"></i> Parents List
+            </NavLink>
+            <NavLink to="/admin-dashboard/parents/add" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-person-plus-fill"></i> Add Parent
+            </NavLink>
+
+            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">Fees</p>
+            <NavLink to="/admin-dashboard/fees/structures" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-journal-text"></i> Fee Structures
+            </NavLink>
+            <NavLink to="/admin-dashboard/fees/structures/add" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-journal-plus"></i> New Fee Structure
+            </NavLink>
+            <NavLink to="/admin-dashboard/fees/payments" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-cash-stack"></i> Fee Payments
+            </NavLink>
+            <NavLink to="/admin-dashboard/fees/payments/record" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-cash-coin"></i> Record Payment
+            </NavLink>
+
+            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">Academics</p>
+            <NavLink to="/admin-dashboard/attendance" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-calendar-check"></i> Daily Attendance
+            </NavLink>
+            <NavLink to="/admin-dashboard/attendance/reports" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-clipboard-data"></i> Attendance Reports
+            </NavLink>
+            <NavLink to="/admin-dashboard/exams" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-pencil-square"></i> Exams & Tests
+            </NavLink>
+            <NavLink to="/admin-dashboard/exams/add" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-file-earmark-plus"></i> Create Exam
+            </NavLink>
+
+            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">System</p>
+            <NavLink to="/admin-dashboard/users" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-people-fill"></i> All Users
+            </NavLink>
+            <NavLink to="/admin-dashboard/notices" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-megaphone-fill"></i> Notices
+            </NavLink>
+            <NavLink to="/admin-dashboard/profile" className={linkClass} onClick={() => setIsOpen(false)}>
+              <i className="bi bi-person-fill"></i> My Profile
+            </NavLink>
           </nav>
-
         </div>
-
       </aside>
     </>
   );
 };
 
-export default AdminSidebar;
+export default AdminSideBar;

@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import FeedbackAlert from "../ui/FeedbackAlert";
 
 // --- Reusable Spinners ---
 const Spinner = () => (
   <div className="flex justify-center items-center h-80">
     <div className="animate-spin rounded-full h-12 w-12 border-b-3 border-green-600"></div>
   </div>
+);
+
+const ButtonSpinner = () => (
+  <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
 );
 
 const StatCard = ({ title, value, subText, colorClass }) => (
@@ -25,8 +31,11 @@ const FeesDashboard = () => {
     collection_percentage: 0,
     this_month_collected: 0,
   });
-  const [loading, setLoading] = useState(true);
+const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   // --- Fetch Fee Statistics ---
   const fetchFeeStats = async () => {
@@ -44,9 +53,18 @@ const FeesDashboard = () => {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
     fetchFeeStats();
   }, []);
+
+  // --- Refresh handler with loading + feedback ---
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setSuccess("");
+    await fetchFeeStats();
+    setRefreshing(false);
+    setSuccess("Fee dashboard data refreshed successfully!");
+  };
 
   if (loading) return <Spinner />;
 
@@ -58,13 +76,15 @@ const FeesDashboard = () => {
           <h1 className="text-xl md:text-2xl font-bold text-gray-800">Fees Dashboard</h1>
           <p className="text-gray-500 mt-1 text-sm">Real-time fee collection & financial overview</p>
         </div>
-        <button onClick={fetchFeeStats} className="milk-btn whitespace-nowrap">
-          🔄 Refresh Data
+<button onClick={handleRefresh} disabled={refreshing} className="milk-btn whitespace-nowrap disabled:opacity-60">
+          {refreshing ? <ButtonSpinner /> : "🔄 Refresh Data"}
+          {refreshing ? " Refreshing..." : ""}
         </button>
       </div>
 
-      {/* Error Message */}
-      {error && <div className="card bg-red-50 border border-red-200 text-red-700 p-4">{error}</div>}
+      {/* Success / Error Messages */}
+      {success && <FeedbackAlert type="success" message={success} onDismiss={() => setSuccess("")} />}
+      {error && <FeedbackAlert type="error" message={error} onDismiss={() => setError("")} />}
 
       {/* --- Key Statistics Grid --- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -104,14 +124,23 @@ const FeesDashboard = () => {
       {/* --- Quick Navigation Cards --- */}
       <div className="card mt-8">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="p-4 border rounded-lg hover:bg-blue-50 text-left transition">
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button
+            onClick={() => navigate("/accountant/fee-records")}
+            className="p-4 border rounded-lg hover:bg-blue-50 text-left transition"
+          >
             <span className="font-medium">📋 View All Fee Records</span>
           </button>
-          <button className="p-4 border rounded-lg hover:bg-blue-50 text-left transition">
+          <button
+            onClick={() => navigate("/accountant/record-payment")}
+            className="p-4 border rounded-lg hover:bg-blue-50 text-left transition"
+          >
             <span className="font-medium">✍️ Record New Payment</span>
           </button>
-          <button className="p-4 border rounded-lg hover:bg-blue-50 text-left transition">
+          <button
+            onClick={() => navigate("/accountant/financial-reports")}
+            className="p-4 border rounded-lg hover:bg-blue-50 text-left transition"
+          >
             <span className="font-medium">📉 Generate Financial Report</span>
           </button>
         </div>

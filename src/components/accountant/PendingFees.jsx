@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import api from "../api/api";
+import FeedbackAlert from "../ui/FeedbackAlert";
 
 // --- Reusable Spinners ---
 const Spinner = () => (
@@ -13,10 +14,13 @@ const ButtonSpinner = () => (
 );
 
 const PendingFees = () => {
-  const [pendingList, setPendingList] = useState([]);
+const [pendingList, setPendingList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [sendingId, setSendingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterClass, setFilterClass] = useState("");
   const [filterTerm, setFilterTerm] = useState("");
@@ -27,10 +31,36 @@ const PendingFees = () => {
     try {
       setLoading(true);
       setError("");
-      const res = await api.get("fees/pending-fees/");
-      console.log("Pending fees data:", res.data);
-      setPendingList(res.data || []);
-      setFilteredList(res.data || []);
+      // Use the existing working reports endpoint + parents list (for reminder targeting)
+      const [feeRes, parentsRes] = await Promise.all([
+        api.get("reports/fees/outstanding/"),
+        api.get("parents/")
+      ]);
+
+      const feeData = Array.isArray(feeRes.data) ? feeRes.data : feeRes.data?.results || [];
+      const parentRows = Array.isArray(parentsRes.data) ? parentsRes.data : parentsRes.data?.results || [];
+
+      // Build a lookup: student name -> parent user id (for targeted reminders)
+      const parentLookup = {};
+      parentRows.forEach((r) => {
+        if (r.student_name && r.parent_user_id && !(r.student_name in parentLookup)) {
+          parentLookup[r.student_name] = r.parent_user_id;
+        }
+      });
+
+      // Map the outstanding report fields to what this page expects
+      const mapped = feeData.map((f) => ({
+        ...f,
+        student_id: parentLookup[f.student_name] || null,
+        parent_user_id: parentLookup[f.student_name] || null,
+        class_name: f.classroom || null,
+        total_expected: f.total_fee,
+        is_overdue: false,
+      }));
+
+      console.log("Pending fees data:", mapped);
+      setPendingList(mapped);
+      setFilteredList(mapped);
     } catch (err) {
       console.error("Failed to load pending fees:", err);
       setError("Could not load pending fee records.");
@@ -84,15 +114,45 @@ const PendingFees = () => {
     return <span className="px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-700">UNPAID</span>;
   };
 
-  // --- Send Reminder Handler ---
-  const sendReminder = async (studentId) => {
-    try {
-      setError("");
-      await api.post(`fees/send-reminder/${studentId}/`);
-      alert("Payment reminder sent successfully!");
-    } catch (err) {
-      setError("Failed to send reminder. Try again.");
+  // --- Send Reminder Handler (creates a targeted fee-reminder announcement) ---
+const sendReminder = async (item) => {
+    setError("");
+    setSuccess("");
+    if (!item.parent_user_id) {
+      setError("No parent linked to this student. Reminder not sent.");
+      return;
     }
+    setSendingId(item.admission_number || item.id);
+    try {
+      const payload = {
+        title: `Fee Reminder - ${item.student_name}`,
+        message: `Dear Parent,\n\nThis is a reminder that ${item.student_name} (${item.admission_number || ""}) still has an outstanding balance of KSh ${Number(item.balance).toLocaleString()} for ${item.term || "the term"}.\n\nPlease clear the balance at your earliest convenience.\n\nThank you,\nLuma 2000 Academy`,
+        priority: "Normal",
+        target: "Parents",
+        recipient: item.parent_user_id,
+      };
+const res = await api.post("anouncements/", payload);
+      if (res.status === 200 || res.status === 201) {
+        setSuccess(`Payment reminder sent to ${item.student_name}'s parent successfully!`);
+      } else {
+        throw new Error(`Unexpected status code: ${res.status}`);
+      }
+    } catch (err) {
+      console.error("Failed to send reminder:", err);
+      const msg = err.response?.data?.detail || err.response?.data?.message || "Failed to send reminder. Try again.";
+      setError(msg);
+    } finally {
+      setSendingId(null);
+    }
+  };
+
+  // --- Refresh handler with loading state ---
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setSuccess("");
+    await fetchPending();
+    setRefreshing(false);
+    setSuccess("Pending fees list refreshed successfully!");
   };
 
   if (loading) return <Spinner />;
@@ -105,13 +165,15 @@ const PendingFees = () => {
           <h1 className="text-xl md:text-2xl font-bold text-gray-800">Pending & Overdue Fees</h1>
           <p className="text-gray-500 mt-1 text-sm">List of students with outstanding fee balances</p>
         </div>
-        <button onClick={fetchPending} className="milk-btn whitespace-nowrap">
-          🔄 Refresh List
+<button onClick={handleRefresh} disabled={refreshing} className="milk-btn whitespace-nowrap disabled:opacity-60">
+          {refreshing ? <ButtonSpinner /> : "🔄 Refresh List"}
+          {refreshing ? " Refreshing..." : ""}
         </button>
       </div>
 
-      {/* Error Message */}
-      {error && <div className="card bg-red-50 border border-red-200 text-red-700 p-4">{error}</div>}
+      {/* Success / Error Messages */}
+      {success && <FeedbackAlert type="success" message={success} onDismiss={() => setSuccess("")} />}
+      {error && <FeedbackAlert type="error" message={error} onDismiss={() => setError("")} />}
 
       {/* --- Search & Filter Controls --- */}
       <div className="card space-y-4">
@@ -203,8 +265,8 @@ const PendingFees = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredList.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
+{filteredList.map((item, idx) => (
+                <tr key={item.admission_number + item.term || idx} className="hover:bg-gray-50">
                   <td className="p-3 border-b font-medium">{item.student_name}</td>
                   <td className="p-3 border-b">{item.admission_number}</td>
                   <td className="p-3 border-b">{item.class_name}</td>
@@ -214,12 +276,13 @@ const PendingFees = () => {
                   <td className="p-3 border-b">
                     <StatusBadge isOverdue={item.is_overdue} hasPartial={item.amount_paid > 0} />
                   </td>
-                  <td className="p-3 border-b">
+<td className="p-3 border-b">
                     <button
-                      onClick={() => sendReminder(item.student_id)}
-                      className="text-blue-600 text-sm font-medium hover:underline"
+                      onClick={() => sendReminder(item)}
+                      disabled={sendingId === (item.admission_number || item.id)}
+                      className="text-blue-600 text-sm font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Send Reminder
+                      {sendingId === (item.admission_number || item.id) ? "Sending..." : "Send Reminder"}
                     </button>
                   </td>
                 </tr>

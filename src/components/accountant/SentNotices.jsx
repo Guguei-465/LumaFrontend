@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import api from "../api/api";
+import FeedbackAlert from "../ui/FeedbackAlert";
 
 // --- Reusable Spinners ---
 const Spinner = () => (
@@ -8,11 +9,17 @@ const Spinner = () => (
   </div>
 );
 
+const ButtonSpinner = () => (
+  <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+);
+
 const SentNotices = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [actionLoadingId, setActionLoadingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterTarget, setFilterTarget] = useState("all");
   const [viewItem, setViewItem] = useState(null);
@@ -77,23 +84,35 @@ const SentNotices = () => {
 
   // --- Actions ---
   const resendItem = async (itemId) => {
+    setError("");
+    setSuccess("");
+    setActionLoadingId(itemId);
     try {
-      setError("");
       await api.post(`anouncements/${itemId}/resend/`);
-      alert("✅ Resent successfully!");
-      fetchItems();
+      setSuccess("Announcement resent successfully!");
+      await fetchItems();
+      setActionLoadingId(null);
     } catch (err) {
-      setError("❌ Failed to resend. Try again.");
+      console.error("Resend failed:", err);
+      setError("Failed to resend. Try again.");
+      setActionLoadingId(null);
     }
   };
 
   const deleteItem = async (itemId) => {
     if (!window.confirm("Delete this announcement?")) return;
+    setError("");
+    setSuccess("");
+    setActionLoadingId(itemId);
     try {
       await api.delete(`anouncements/${itemId}/`);
-      fetchItems();
+      setSuccess("Announcement deleted successfully!");
+      await fetchItems();
+      setActionLoadingId(null);
     } catch (err) {
-      setError("❌ Could not delete.");
+      console.error("Delete failed:", err);
+      setError("Could not delete. Try again.");
+      setActionLoadingId(null);
     }
   };
 
@@ -112,10 +131,11 @@ const SentNotices = () => {
           <h1 className="text-xl md:text-2xl font-bold text-gray-800">📨 Sent Announcements</h1>
           <p className="text-gray-500 mt-1 text-sm">View announcements sent to parents or all users</p>
         </div>
-        <button onClick={fetchItems} className="milk-btn whitespace-nowrap">🔄 Refresh History</button>
+<button onClick={fetchItems} className="milk-btn whitespace-nowrap">🔄 Refresh History</button>
       </div>
 
-      {error && <div className="card bg-red-50 border border-red-200 text-red-700 p-4">{error}</div>}
+      {success && <FeedbackAlert type="success" message={success} onDismiss={() => setSuccess("")} />}
+      {error && <FeedbackAlert type="error" message={error} onDismiss={() => setError("")} />}
 
       <div className="card space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -167,10 +187,22 @@ const SentNotices = () => {
                   <td className="p-3 border-b font-medium">{item.target}</td>
                   <td className="p-3 border-b">{item.title}</td>
                   <td className="p-3 border-b"><PriorityBadge priority={item.priority} /></td>
-                  <td className="p-3 border-b space-x-2 text-sm">
+<td className="p-3 border-b space-x-2 text-sm">
                     <button onClick={() => setViewItem(item)} className="text-blue-600 hover:underline">View</button>
-                    <button onClick={() => resendItem(item.id)} className="text-green-600 hover:underline">Resend</button>
-                    <button onClick={() => deleteItem(item.id)} className="text-red-600 hover:underline">Delete</button>
+                    <button
+                      onClick={() => resendItem(item.id)}
+                      disabled={actionLoadingId === item.id}
+                      className="text-green-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {actionLoadingId === item.id ? "Resending..." : "Resend"}
+                    </button>
+                    <button
+                      onClick={() => deleteItem(item.id)}
+                      disabled={actionLoadingId === item.id}
+                      className="text-red-600 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {actionLoadingId === item.id ? <ButtonSpinner /> : "Delete"}
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import FeedbackAlert from "../ui/FeedbackAlert";
 
 // --- Reusable Spinners ---
 const Spinner = () => (
@@ -13,10 +15,13 @@ const ButtonSpinner = () => (
 );
 
 const FeeRecords = () => {
+  const navigate = useNavigate();
   const [payments, setPayments] = useState([]);
   const [filteredPayments, setFilteredPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all"); // all / paid / partial / pending
   const [filterTerm, setFilterTerm] = useState("");
@@ -28,11 +33,11 @@ const FeeRecords = () => {
       setLoading(true);
       setError("");
       const res = await api.get("fees/payments/");
-      console.log("Fetched payments:", res.data);
+      console.log(res.data);
       setPayments(res.data || []);
       setFilteredPayments(res.data || []);
     } catch (err) {
-      console.error("Failed to load payments:", err);
+      console.error(err);
       setError("Could not load payment records.");
     } finally {
       setLoading(false);
@@ -75,7 +80,7 @@ const FeeRecords = () => {
     setFilteredPayments(result);
   }, [payments, searchTerm, filterStatus, filterTerm, filterClass]);
 
-  // --- Helper for status badge ---
+// --- Helper for status badge ---
   const StatusBadge = ({ status }) => {
     const styles = {
       paid: "bg-green-100 text-green-700",
@@ -89,6 +94,15 @@ const FeeRecords = () => {
     );
   };
 
+  // --- Refresh handler with loading + feedback ---
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setSuccess("");
+    await fetchPayments();
+    setRefreshing(false);
+    setSuccess("Payment records refreshed successfully!");
+  };
+
   if (loading) return <Spinner />;
 
   return (
@@ -99,13 +113,15 @@ const FeeRecords = () => {
           <h1 className="text-xl md:text-2xl font-bold text-gray-800">Fee Payment Records</h1>
           <p className="text-gray-500 mt-1 text-sm">View, search and filter all student fee payments</p>
         </div>
-        <button onClick={fetchPayments} className="milk-btn whitespace-nowrap">
-          🔄 Refresh List
+        <button onClick={handleRefresh} disabled={refreshing} className="milk-btn whitespace-nowrap disabled:opacity-60">
+          {refreshing ? <ButtonSpinner /> : "🔄 Refresh List"}
+          {refreshing ? " Refreshing..." : ""}
         </button>
       </div>
 
-      {/* Error Message */}
-      {error && <div className="card bg-red-50 border border-red-200 text-red-700 p-4">{error}</div>}
+      {/* Success / Error Messages */}
+      {success && <FeedbackAlert type="success" message={success} onDismiss={() => setSuccess("")} />}
+      {error && <FeedbackAlert type="error" message={error} onDismiss={() => setError("")} />}
 
       {/* --- Search & Filter Bar --- */}
       <div className="card space-y-4">
@@ -198,7 +214,12 @@ const FeeRecords = () => {
                   <td className="p-3 border-b"><StatusBadge status={payment.status} /></td>
                   <td className="p-3 border-b text-sm">{new Date(payment.payment_date).toLocaleDateString()}</td>
                   <td className="p-3 border-b">
-                    <button className="text-blue-600 text-sm font-medium hover:underline">View / Print</button>
+                    <button
+                      onClick={() => navigate(`/accountant/receipt-generator?payment=${payment.id}`)}
+                      className="text-blue-600 text-sm font-medium hover:underline"
+                    >
+                      View / Print
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -1,281 +1,97 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import api from "../api/api";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
-    students: 0,
-    teachers: 0,
-    parents: 0,
-    users: 0,
-    classes: 0,
-    subjects: 0,
-    announcements: 0,
-    feeStructures: 0,
+    total_users: 0,
+    admin_count: 0,
+    teacher_count: 0,
+    student_count: 0,
+    parent_count: 0,
+    staff_count: 0,
+    active_users: 0,
+    inactive_users: 0
   });
-
-  const [recentStudents, setRecentStudents] = useState([]);
-  const [recentAnnouncements, setRecentAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
-
-  const fetchDashboard = async () => {
+  // Fetch aggregated stats from Django backend
+  const fetchStats = async () => {
     try {
-      const [
-        students,
-        teachers,
-        parents,
-        users,
-        classes,
-        subjects,
-        announcements,
-        fees,
-      ] = await Promise.all([
-        api.get("students/"),
-        api.get("teachers/"),
-        api.get("accounts/parents/"),
-        api.get("accounts/users/"),
-        api.get("classes/"),
-        api.get("subjects/"),
-        api.get("announcements/"),
-        api.get("fees/"),
-      ]);
-
-      setStats({
-        students: students.data.length,
-        teachers: teachers.data.length,
-        parents: parents.data.length,
-        users: users.data.length,
-        classes: classes.data.length,
-        subjects: subjects.data.length,
-        announcements: announcements.data.length,
-        feeStructures: fees.data.length,
-      });
-
-      setRecentStudents(students.data.slice());
-      setRecentAnnouncements(announcements.data.slice());
-    } catch (error) {
-      console.log(error);
+      // You can add this simple stats endpoint in Django that returns these counts
+      const { data } = await api.get("custom-users/stats/");
+      setStats(data);
+    } catch (err) {
+      toast.error("❌ Failed to load dashboard overview");
     } finally {
       setLoading(false);
     }
   };
 
-  const cards = [
-    {
-      title: "Students",
-      className: "card p-8 m-4",
-      value: stats.students,
-      link: "admin/students",
-    },
-    {
-      title: "Teachers",
-      value: stats.teachers,
-      link: "admin/teachers",
-    },
-    {
-      title: "Parents",
-      value: stats.parents,
-      link: "admin/parents",
-    },
-    {
-      title: "Users",
-      value: stats.users,
-      link: "admin/users",
-    },
-    {
-      title: "Classes",
-      value: stats.classes,
-      link: "admin/classes",
-    },
-    {
-      title: "Subjects",
-      value: stats.subjects,
-      link: "admin/subjects",
-    },
-    {
-      title: "Announcements",
-      value: stats.announcements,
-      className: "card",
-      link: "admin/announcements",
-    },
-    {
-      title: "Fee Structures",
-      className: "card",
-      value: stats.feeStructures,
-      link: "admin/fees",
-    },
-  ];
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <h2 className="text-xl font-semibold">
-          Loading Dashboard...
-        </h2>
+      <div className="p-6 text-center text-gray-500">
+        <p className="text-lg">Loading admin overview...</p>
       </div>
     );
   }
 
   return (
-    <div className="h-full m-4 bg-gray-100 ">
-      <div className="p-5">
-
-      
-
-      <h1 className="text-3xl font-bold mb-8">
-        Admin Dashboard
-      </h1>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-
-        {cards.map((card, index) => (
-          <Link
-            key={index}
-            to={card.link}
-            className="card p-6 rounded-xl text-white shadow-lg hover:shadow-xl transition"
-          >
-            <div className="flex mx-4 justify-between items-center">
-
-              <div>
-
-                <h3 className="text-lg">
-                  {card.title}
-                </h3>
-
-                <h2 className="text-3xl font-bold mt-2">
-                  {card.value}
-                </h2>
-
-              </div>
-
-
-            </div>
-
-          </Link>
-        ))}
-
+    <div className="p-4">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold">Admin Dashboard Overview</h2>
+        <p className="text-gray-500 mt-1">System summary & registered users statistics</p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-
-        <div className="bg-white rounded-xl shadow-md p-6">
-
-          <h2 className="text-xl font-bold mt-4 mb-5">
-            Recently Registered Students
-          </h2>
-
-          <div className="space-y-4">
-
-            {recentStudents.length > 0 ? (
-              recentStudents.map((student) => (
-                <div
-                  key={student.id}
-                  className="flex items-center justify-between border-b pb-3"
-                >
-                  <div>
-                    <h4 className="font-semibold">
-                      {student.first_name} {student.last_name}
-                    </h4>
-
-                    <p className="text-gray-500 text-sm">
-                      {student.admission_number}
-                    </p>
-                  </div>
-
-                  <Link
-                    to={`/admin/students/${student.id}`}
-                    className="text-green-600 hover:underline"
-                  >
-                    View
-                  </Link>
-                </div>
-              ))
-            ) : (
-              <p>No students found.</p>
-            )}
-
-          </div>
-
+      {/* Main Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div className="card p-5 bg-blue-50 border-l-4 border-blue-500">
+          <p className="text-sm text-blue-700 font-medium">Total Registered Users</p>
+          <p className="text-3xl font-bold text-blue-800 mt-1">{stats.total_users}</p>
         </div>
-
-        <div className="bg-white rounded-xl shadow-md p-6">
-
-          <h2 className="text-xl font-bold mb-5">
-            Latest Announcements
-          </h2>
-
-          <div className="space-y-4">
-
-            {recentAnnouncements.length > 0 ? (
-              recentAnnouncements.map((item) => (
-                <div
-                  key={item.id}
-                  className="border-b pb-3"
-                >
-                  <h4 className="font-semibold">
-                    {item.title}
-                  </h4>
-
-                  <p className="text-gray-500 text-sm">
-                    {item.target}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p>No announcements available.</p>
-            )}
-
-          </div>
-
+        <div className="card p-5 bg-green-50 border-l-4 border-green-500">
+          <p className="text-sm text-green-700 font-medium">Active Accounts</p>
+          <p className="text-3xl font-bold text-green-800 mt-1">{stats.active_users}</p>
         </div>
-
-      </div>
-
-      <div className="bg-white rounded-xl shadow-md p-6 mt-8">
-
-        <h2 className="text-xl font-bold mb-5">
-          Quick Actions
-        </h2>
-
-        <div className="flex flex-wrap gap-4">
-
-          <Link
-            to="/admin/register-user"
-            className="bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700"
-          >
-            Register User
-          </Link>
-
-          <Link
-            to="/admin/register-student"
-            className="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700"
-          >
-            Register Student
-          </Link>
-
-          <Link
-            to="/admin/announcements"
-            className="bg-purple-600 text-white px-5 py-3 rounded-lg hover:bg-purple-700"
-          >
-            Post Announcement
-          </Link>
-
-          <Link
-            to="/admin/fees"
-            className="bg-orange-600 text-white px-5 py-3 rounded-lg hover:bg-orange-700"
-          >
-            Manage Fees
-          </Link>
-
+        <div className="card p-5 bg-red-50 border-l-4 border-red-500">
+          <p className="text-sm text-red-700 font-medium">Inactive Accounts</p>
+          <p className="text-3xl font-bold text-red-800 mt-1">{stats.inactive_users}</p>
         </div>
-
+        <div className="card p-5 bg-teal-50 border-l-4 border-teal-500">
+          <p className="text-sm text-teal-700 font-medium">System Administrators</p>
+          <p className="text-3xl font-bold text-teal-800 mt-1">{stats.admin_count}</p>
+        </div>
       </div>
-      </div>
 
+      {/* Role Breakdown Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="card p-5 shadow-sm">
+          <p className="text-sm text-gray-600 font-medium">Teachers</p>
+          <p className="text-2xl font-bold text-gray-800 mt-1">{stats.teacher_count}</p>
+        </div>
+        <div className="card p-5 shadow-sm">
+          <p className="text-sm text-gray-600 font-medium">Students</p>
+          <p className="text-2xl font-bold text-gray-800 mt-1">{stats.student_count}</p>
+        </div>
+        <div className="card p-5 shadow-sm">
+          <p className="text-sm text-gray-600 font-medium">Parents/Guardians</p>
+          <p className="text-2xl font-bold text-gray-800 mt-1">{stats.parent_count}</p>
+        </div>
+        <div className="card p-5 shadow-sm">
+          <p className="text-sm text-gray-600 font-medium">Office Staff</p>
+          <p className="text-2xl font-bold text-gray-800 mt-1">{stats.staff_count}</p>
+        </div>
+        <div className="card p-5 shadow-sm col-span-1 sm:col-span-2 lg:col-span-3 bg-gray-50">
+          <p className="text-sm text-gray-600 font-medium">Quick Summary</p>
+          <p className="text-gray-700 mt-1">
+            System has <strong>{stats.total_users}</strong> registered users: <strong>{stats.active_users}</strong> active & <strong>{stats.inactive_users}</strong> inactive across all roles.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

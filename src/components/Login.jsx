@@ -28,8 +28,8 @@ const Login = () => {
             localStorage.setItem("refresh", refresh);
             localStorage.setItem("user", JSON.stringify(userData));
 
-            const routes = {
-                SUPER_ADMIN: "/admin",
+const routes = {
+                SUPER_ADMIN: "/admin-dashboard",
                 ACADEMIC_COORDINATOR: "/academic-coordinator",
                 ACCOUNTANT: "/accountant",
                 TEACHER: "/teacher",

@@ -1,34 +1,27 @@
-import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
-import DashboardNavBar from "../DashboardNavBar";
-import AdminSidebar from "./AdminSidebar";
+import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import DashboardNavBar from '../DashboardNavBar';
+import AdminSideBar from './AdminSideBar';
 
 const AdminLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
-
       {/* Sidebar */}
-      <AdminSidebar
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-      />
+      <AdminSideBar isOpen={isOpen} setIsOpen={setIsOpen} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-
         <DashboardNavBar
-          title="Administrator"
-          setIsOpen={setIsOpen}
+          onMenuClick={() => setIsOpen(!isOpen)}
+          title="Admin Dashboard"
         />
 
-        <main className="flex-1 overflow-y-auto p-4 m-5">
+        <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
-
       </div>
-
     </div>
   );
 };

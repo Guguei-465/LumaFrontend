@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../api/api'
+import FeedbackAlert from '../ui/FeedbackAlert'
 
 // --- Reusable Spinner ---
 const Spinner = () => (
@@ -15,9 +17,12 @@ const AccountantDashboard = () => {
     total_collected: 0,
     total_balance: 0
   })
-  const [recentPayments, setRecentPayments] = useState([])
+const [recentPayments, setRecentPayments] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [refreshing, setRefreshing] = useState(false)
+  const [success, setSuccess] = useState("")
+  const navigate = useNavigate()
 
   // --- Fetch Dashboard Data ---
   const fetchDashboardData = async () => {
@@ -46,19 +51,31 @@ const AccountantDashboard = () => {
     }
   }
 
-  useEffect(() => {
+useEffect(() => {
     fetchDashboardData()
   }, [])
+
+  // --- Refresh handler with loading + feedback ---
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    setSuccess("")
+    await fetchDashboardData()
+    setRefreshing(false)
+    setSuccess("Dashboard refreshed successfully!")
+  }
 
   if (loading) return <Spinner />
 
   return (
     <div className="space-y-8 p-6 md:p-8">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow p-8">
+<div className="bg-white rounded-xl shadow p-8">
         <h1 className="text-3xl font-bold text-gray-800">Accountant Dashboard</h1>
         <p className="text-gray-500 mt-3 text-lg">Manage school fees, payments and financial reports.</p>
-        {error && <p className="text-red-600 mt-4 font-medium">{error}</p>}
+        <div className="mt-4">
+          {success && <FeedbackAlert type="success" message={success} onDismiss={() => setSuccess("")} />}
+          {error && <FeedbackAlert type="error" message={error} onDismiss={() => setError("")} />}
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -88,9 +105,11 @@ const AccountantDashboard = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {/* Recent Payments Table */}
         <div className="bg-white rounded-xl shadow">
-          <div className="border-b px-8 py-6 flex justify-between items-center">
+<div className="border-b px-8 py-6 flex justify-between items-center">
             <h2 className="font-semibold text-xl">Recent Fee Payments</h2>
-            <button onClick={fetchDashboardData} className="text-base text-blue-600 hover:underline">Refresh</button>
+            <button onClick={handleRefresh} disabled={refreshing} className="text-base text-blue-600 hover:underline disabled:opacity-60">
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </button>
           </div>
           <div className="overflow-x-auto p-6">
             <table className="w-full">
@@ -142,7 +161,7 @@ const AccountantDashboard = () => {
       <div className="bg-white rounded-xl shadow p-8">
         <h2 className="text-xl font-semibold text-indigo-600 mb-5">Financial Reports</h2>
         <p className="text-gray-500 mb-8 text-lg">Generate income summaries, payment reports and fee balances.</p>
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg transition text-lg">
+<button onClick={() => navigate("/accountant/financial-reports")} className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg transition text-lg">
           Generate Report
         </button>
       </div>

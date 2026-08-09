@@ -1,30 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./components/context/AuthContext";
 import ProtectedRoutes from "./components/context/ProtectedRoutes";
-
 import Login from "./components/Login";
 import Home from "./components/Home";
 import NotFound from "./components/NotFound";
 import Unauthorized from "./components/Unauthorized";
-import AdminLayout from "./components/admin/AdminLayout";
-import AdminDashboard from "./components/admin/AdminDashboard";
-import Users from "./components/admin/Users";
-import Teachers from "./components/admin/Teachers";
-import Parents from "./components/admin/Parents";
-import Classes from "./components/admin/Classes";
-import ClassForm from "./components/admin/ClassForm";
-import AdminSubjects from "./components/admin/AdminSubjects";
-import SubjectForm from "./components/admin/SubjectForm";
-import Assignments from "./components/admin/Assignments";
-import AssignmentForm from "./components/admin/AssignmentForm";
-import Announcements from "./components/admin/Announcements";
-import AnnouncementForm from "./components/admin/AnnouncementForm";
-import Fees from "./components/admin/Fees";
-import FeeForm from "./components/admin/FeeForm";
-import Payments from "./components/admin/Payments";
-import Reports from "./components/admin/Reports";
-import AdminProfile from "./components/admin/AdminProfile";
 import AccountantLayout from "./components/accountant/AccountantLayout";
 import AccountantDashboard from "./components/accountant/AccountantDashboard";
 import AccountantProfile from "./components/accountant/AccountantProfile";
@@ -37,11 +19,6 @@ import ParentFees from "./components/parents/ParentFees";
 import ParentPayments from "./components/parents/ParentPayment";
 import ParentNotifications from "./components/parents/ParentNotifications";
 import ParentProfile from "./components/parents/ParentProfile";
-import AdminTimetables from "./components/admin/AdminTimetable";
-import AdminTimetableForm from "./components/academiccoordinator/TimetableForm";
-import RegisterUsers from "./components/admin/RegisterUsers";
-import RegisterStudents from "./components/admin/RegisterStudents";
-import AdminStudents from "./components/admin/AdminStudents";
 import StudentsAcademic from "./components/academiccoordinator/StudentsAcademic";
 import ParentLayout from "./components/parents/ParentLayout";
 import ParentSettings from "./components/parents/ParentSettings";
@@ -82,11 +59,48 @@ import FinancialReports from "./components/accountant/FinancialReports";
 import FeesDashboard from "./components/accountant/FeesDashboard";
 import FeeRecords from "./components/accountant/FeeRecords";
 import ExpenseManager from "./components/accountant/ExpenseManager";
+// ================= ADMIN =================
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import ListStudents from "./components/admin/ListStudents";
+import EditStudent from "./components/admin/EditStudent";
+import ListTeachers from "./components/admin/ListTeachers";
+import AddTeacher from "./components/admin/AddTeacher";
+import EditTeacher from "./components/admin/EditTeacher";
+import ListParents from "./components/admin/ListParents";
+import AddParent from "./components/admin/AddParent";
+import EditParent from "./components/admin/EditParent";
+import FeeStructureList from "./components/admin/FeeStructureList";
+import AddFeeStructure from "./components/admin/AddFeeStructure";
+import EditFeeStructure from "./components/admin/EditFeeStructure";
+import FeePaymentsList from "./components/admin/FeePaymentsList";
+import AdminRecordPayment from "./components/admin/RecordPayment";
+import DailyAttendance from "./components/admin/DailyAttendance";
+import AttendanceReports from "./components/admin/AttendanceReports";
+import ExamList from "./components/admin/ExamList";
+import AddExam from "./components/admin/AddExam";
+import MarksEntry from "./components/admin/MarksEntry";
+import AdminUserList from "./components/admin/AdminUserList";
+import AdminNotices from "./components/admin/AdminNotices";
+import AdminProfile from "./components/admin/AdminProfile";
+import AddStudent from "./components/admin/AddStudent";
 
 function App() {
   return (
-    <BrowserRouter>
+<BrowserRouter>
     <AuthProvider>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Navigate to="/login" replace />} />
@@ -97,36 +111,39 @@ function App() {
         {/* Global Protected Routes Wrapper */}
         <Route element={<ProtectedRoutes />}>
 
+{/* admin routs */}
           {/* ================= ADMIN ================= */}
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route
+            path="/admin-dashboard"
+            element={
+            <ProtectedRoutes allowedRoles={["super_admin"]}>
+                <AdminLayout />
+              </ProtectedRoutes>
+            }
+          >
             <Route index element={<AdminDashboard />} />
-            <Route path="register-user" element={<RegisterUsers />} />
-            <Route path="register-student" element={<RegisterStudents />} />
-            <Route path="users" element={<Users />} />
-            <Route path="users/edit/:id" element={<RegisterUsers />} />
-            <Route path="teachers" element={<Teachers />} />
-            <Route path="parents" element={<Parents />} />
-            <Route path="students" element={<AdminStudents />} />
-            <Route path="classes" element={<Classes />} />
-            <Route path="classes/create" element={<ClassForm />} />
-            <Route path="classes/edit/:id" element={<ClassForm />} />
-            <Route path="subjects" element={<AdminSubjects />} />
-            <Route path="subjects/create" element={<SubjectForm />} />
-            <Route path="subjects/edit/:id" element={<SubjectForm />} />
-            <Route path="assignments" element={<Assignments />} />
-            <Route path="assignments/create" element={<AssignmentForm />} />
-            <Route path="assignments/edit/:id" element={<AssignmentForm />} />
-            <Route path="timetable" element={<AdminTimetables />} />
-            <Route path="timetable/create" element={<AdminTimetableForm />} />
-            <Route path="timetable/edit/:id" element={<AdminTimetableForm />} />
-            <Route path="announcements" element={<Announcements />} />
-            <Route path="announcements/create" element={<AnnouncementForm />} />
-            <Route path="announcements/edit/:id" element={<AnnouncementForm />} />
-            <Route path="fees" element={<Fees />} />
-            <Route path="fees/create" element={<FeeForm />} />
-            <Route path="fees/edit/:id" element={<FeeForm />} />
-            <Route path="payments" element={<Payments />} />
-            <Route path="reports" element={<Reports />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="students" element={<ListStudents />} />
+            <Route path="students/add" element={<AddStudent />} />
+            <Route path="students/edit/:id" element={<EditStudent />} />
+            <Route path="teachers" element={<ListTeachers />} />
+            <Route path="teachers/add" element={<AddTeacher />} />
+            <Route path="teachers/edit/:id" element={<EditTeacher />} />
+            <Route path="parents" element={<ListParents />} />
+            <Route path="parents/add" element={<AddParent />} />
+            <Route path="parents/edit/:id" element={<EditParent />} />
+            <Route path="fees/structures" element={<FeeStructureList />} />
+            <Route path="fees/structures/add" element={<AddFeeStructure />} />
+            <Route path="fees/structures/edit/:id" element={<EditFeeStructure />} />
+            <Route path="fees/payments" element={<FeePaymentsList />} />
+            <Route path="fees/payments/record" element={<AdminRecordPayment />} />
+            <Route path="attendance" element={<DailyAttendance />} />
+            <Route path="attendance/reports" element={<AttendanceReports />} />
+            <Route path="exams" element={<ExamList />} />
+            <Route path="exams/add" element={<AddExam />} />
+            <Route path="exams/marks-entry/:examId" element={<MarksEntry />} />
+            <Route path="users" element={<AdminUserList />} />
+            <Route path="notices" element={<AdminNotices />} />
             <Route path="profile" element={<AdminProfile />} />
           </Route>
 
@@ -223,9 +240,12 @@ function App() {
 
           
 
-          {/* Optional General Redirect */}
+{/* Optional General Redirect */}
           <Route path="/dashboard" element={<Navigate to="/parent" replace />} />
         </Route>
+
+        {/* Admin alias — backward compatible redirect */}
+        <Route path="/admin" element={<Navigate to="/admin-dashboard" replace />} />
 
         {/* ERROR PAGES */}
         <Route path="/not_authorized" element={<Unauthorized />} />
