@@ -10,7 +10,7 @@ const AdminNotices = () => {
   // Fetch notices from Django backend
   const fetchNotices = async () => {
     try {
-      const { data } = await api.get("notices/"); // your Notice API endpoint
+const { data } = await api.get("anouncements/"); // your Notice API endpoint
       setNotices(data);
     } catch (err) {
       toast.error("❌ Failed to load notices");

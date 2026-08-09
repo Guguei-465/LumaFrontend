@@ -26,7 +26,7 @@ const EditTeacher = () => {
   useEffect(() => {
     const fetchTeacher = async () => {
       try {
-        const { data } = await api.get(`teachers/${id}/`);
+const { data } = await api.get(`accounts/users/${id}/`);
         setForm({
           first_name: data.first_name || "",
           last_name: data.last_name || "",
@@ -59,7 +59,7 @@ const EditTeacher = () => {
     setLoading(true);
 
     try {
-      await api.patch(`teachers/${id}/`, form);
+await api.patch(`accounts/users/${id}/update/`, form);
       toast.success("✅ Teacher details updated successfully!");
       setTimeout(() => navigate("/admin-dashboard/teachers"), 1200);
     } catch (err) {

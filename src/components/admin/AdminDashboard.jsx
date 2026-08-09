@@ -16,11 +16,20 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   // Fetch aggregated stats from Django backend
-  const fetchStats = async () => {
+const fetchStats = async () => {
     try {
-      // You can add this simple stats endpoint in Django that returns these counts
-      const { data } = await api.get("custom-users/stats/");
-      setStats(data);
+      const { data } = await api.get("accounts/users/");
+      const users = Array.isArray(data) ? data : (data.results || []);
+      setStats({
+        total_users: users.length,
+        admin_count: users.filter(u => (u.role || "").toUpperCase().includes("ADMIN")).length,
+        teacher_count: users.filter(u => (u.role || "").toUpperCase() === "TEACHER").length,
+        student_count: users.filter(u => (u.role || "").toUpperCase() === "STUDENT").length,
+        parent_count: users.filter(u => (u.role || "").toUpperCase() === "PARENT").length,
+        staff_count: users.filter(u => (u.role || "").toUpperCase() === "STAFF").length,
+        active_users: users.filter(u => u.is_active).length,
+        inactive_users: users.filter(u => !u.is_active).length
+      });
     } catch (err) {
       toast.error("❌ Failed to load dashboard overview");
     } finally {

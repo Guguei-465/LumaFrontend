@@ -11,7 +11,7 @@ const FeeStructureList = () => {
 
   const fetchStructures = async () => {
     try {
-      const { data } = await api.get("fees/structures/");
+const { data } = await api.get("fees/fee-structures/");
       setFeeStructures(data);
     } catch {
       toast.error("Failed to load fee structures");
@@ -29,7 +29,7 @@ const FeeStructureList = () => {
   const handleDelete = async (id, className) => {
     if (!window.confirm(`Delete fee structure for ${className}?`)) return;
     try {
-      await api.delete(`fees/structures/${id}/`);
+await api.delete(`fees/fee-structures/${id}/`);
       toast.success("Fee structure deleted");
       fetchStructures();
     } catch { toast.error("Delete failed — may have linked payments"); }

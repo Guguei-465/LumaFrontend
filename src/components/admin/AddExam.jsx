@@ -24,7 +24,7 @@ const AddExam = () => {
   const handleSubmit = async (e) => {
     e.preventDefault(); setSubmitting(true);
     try {
-      await api.post("exams/", form);
+await api.post("exams/create/", form);
       toast.success("✅ Exam created successfully! Ready for marks entry");
       navigate("/admin-dashboard/exams");
     } catch (err) {

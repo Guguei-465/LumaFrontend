@@ -48,7 +48,7 @@ const DailyAttendance = () => {
     if (!students.every(s => s.status)) return toast.warn("Please mark attendance for every student");
     setSaving(true);
     try {
-      await api.post("attendance/bulk/", {
+await api.post("attendance/create/", {
         class: selectedClass,
         date: attendanceDate,
         records: students.map(s => ({

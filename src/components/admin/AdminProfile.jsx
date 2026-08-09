@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 import api from "../api/api";
 import UserAvatar from "../UseAvata";
 
@@ -37,15 +38,18 @@ const AdminProfile = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [forgotEmail, setForgotEmail] = useState("");
+const [forgotEmail, setForgotEmail] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-  // --- Fetch Profile — same logic, admin endpoint ---
+  const { user: authUser } = useContext(AuthContext);
+
+  // --- Fetch Profile — uses current user id from auth context ---
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
-      const { data } = await api.get("accounts/admin-profile/"); // ✅ Admin-specific endpoint
+      const id = authUser?.id;
+      const { data } = await api.get(id ? `accounts/users/${id}/` : "accounts/users/"); // ✅ Uses current user endpoint
       console.log("Raw Admin Profile data:", data);
       // Safe array-or-object handling
       const singleProfile = Array.isArray(data) ? data[0] : data;
@@ -84,8 +88,8 @@ const AdminProfile = () => {
       if (!profile.id) throw new Error("Profile ID missing — cannot update");
       console.log("Updating admin profile:", profile);
 
-      await api.put(
-        "accounts/admin-profile/",
+await api.put(
+        profile.id ? `accounts/users/${profile.id}/update/` : "accounts/users/",
         profile
       );
 
@@ -109,7 +113,7 @@ const AdminProfile = () => {
 
     try {
       setSaving(true);
-      await api.post("auth/change-password/", {
+await api.post("accounts/change-password/", {
         old_password: oldPassword,
         new_password: newPassword
       });

@@ -21,11 +21,11 @@ const MarksEntry = () => {
     return {grade:"E", remark:"Needs Improvement"};
   };
 
-  useEffect(() => {
+useEffect(() => {
     if(!selectedClass || !selectedSubject) return;
     const loadStudents = async () => {
       try {
-        const { data } = await api.get(`exams/${examId}/students/?class=${encodeURIComponent(selectedClass)}`);
+        const { data } = await api.get(`students/?current_class=${encodeURIComponent(selectedClass)}`);
         setStudents(data.map(s => ({
           ...s,
           marks: s.marks || 0,
@@ -47,8 +47,13 @@ const MarksEntry = () => {
   const handleSubmit = async (e) => {
     e.preventDefault(); setSaving(true);
     try {
-      await api.post(`exams/${examId}/save-marks/`, {
-        class: selectedClass, subject: selectedSubject, records: students
+await api.post("results/bulk", {
+        submission: examId,
+        results: students.map(s => ({
+          student: s.id,
+          marks: s.marks,
+          remarks: s.remark || ""
+        }))
       });
       toast.success("✅ Marks saved & graded successfully!");
     } catch { toast.error("Failed to save marks"); }

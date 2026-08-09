@@ -29,7 +29,7 @@ const AddFeeStructure = () => {
   const handleSubmit = async (e) => {
     e.preventDefault(); setSubmitting(true);
     try {
-      await api.post("fees/structures/", {...form, total_fee: total});
+await api.post("fees/fee-structures/", {...form, total_fee: total});
       toast.success("✅ Fee structure created successfully!");
       navigate("/admin-dashboard/fees/structures");
     } catch (err) {

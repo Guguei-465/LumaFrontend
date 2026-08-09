@@ -9,10 +9,11 @@ const ListTeachers = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
-  const fetchTeachers = async () => {
+const fetchTeachers = async () => {
     try {
-      const { data } = await api.get("teachers/");
-      setTeachers(data);
+      const { data } = await api.get("accounts/users/?role=TEACHER");
+      const list = Array.isArray(data) ? data : (data.results || []);
+      setTeachers(list.filter(t => (t.role || "").toUpperCase() === "TEACHER"));
     } catch {
       toast.error("Failed to load teachers list");
     } finally {
@@ -31,7 +32,7 @@ const ListTeachers = () => {
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete teacher ${name}?`)) return;
     try {
-      await api.delete(`teachers/${id}/`);
+await api.delete(`accounts/users/${id}/delete/`);
       toast.success("Teacher deleted successfully");
       fetchTeachers();
     } catch {

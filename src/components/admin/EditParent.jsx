@@ -28,7 +28,7 @@ const EditParent = () => {
   useEffect(() => {
     const fetchParent = async () => {
       try {
-        const { data } = await api.get(`parents/${id}/`);
+const { data } = await api.get(`accounts/users/${id}/`);
         // Pre-fill all fields safely with fallbacks
         setForm({
           first_name: data.first_name || "",
@@ -65,7 +65,7 @@ const EditParent = () => {
 
     try {
       // Use PATCH for partial updates (standard for edit)
-      await api.patch(`parents/${id}/`, form);
+await api.patch(`accounts/users/${id}/update/`, form);
       toast.success("✅ Parent details updated successfully!");
       setTimeout(() => navigate("/admin-dashboard/parents"), 1200); // back to list
     } catch (err) {

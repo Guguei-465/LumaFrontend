@@ -9,9 +9,9 @@ const AdminUserList = () => {
   const [filterRole, setFilterRole] = useState("all");
 
   // Fetch every CustomUser from Django backend
-  const fetchAllUsers = async () => {
+const fetchAllUsers = async () => {
     try {
-      const { data } = await api.get("custom-users/"); // matches your CustomUser endpoint
+      const { data } = await api.get("accounts/users/"); // matches your CustomUser endpoint
       setAllUsers(data);
     } catch (err) {
       toast.error("❌ Failed to load registered users");

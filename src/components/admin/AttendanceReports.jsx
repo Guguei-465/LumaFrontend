@@ -11,7 +11,7 @@ const AttendanceReports = () => {
   const fetchReport = async () => {
     setLoading(true);
     try {
-      const { data } = await api.get("attendance/reports/", { params: filters });
+const { data } = await api.get("attendance/pending/", { params: filters });
       setRecords(data.records || []);
       setSummary(data.summary || { present:0, absent:0, late:0, total:0 });
     } catch {

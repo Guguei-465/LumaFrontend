@@ -25,10 +25,10 @@ const RecordPayment = () => {
     if (!studentId) return;
     try {
       // Example API call to get active fee for student
-      const { data } = await api.get(`students/${studentId}/current-fee/`);
-      setForm(prev => ({
+const { data } = await api.get(`fees/student/${studentId}/`);
+setForm(prev => ({
         ...prev,
-        student_id,
+        student_id: studentId,
         student_name: data.student_name,
         admission_number: data.admission_number,
         fee_structure_id: data.structure_id,

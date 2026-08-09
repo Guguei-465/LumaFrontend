@@ -19,8 +19,8 @@ const AddTeacher = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setSubmitting(true);
-    try {
-      await api.post("teachers/", form);
+try {
+      await api.post("accounts/register/", { ...form, role: "TEACHER" });
       toast.success("✅ Teacher registered successfully!");
       navigate("/admin-dashboard/teachers");
     } catch (err) {

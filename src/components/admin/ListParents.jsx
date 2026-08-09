@@ -9,10 +9,11 @@ const ListParents = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
-  const fetchParents = async () => {
+const fetchParents = async () => {
     try {
-      const { data } = await api.get("parents/");
-      setParents(data);
+      const { data } = await api.get("accounts/users/?role=PARENT");
+      const list = Array.isArray(data) ? data : (data.results || []);
+      setParents(list.filter(p => (p.role || "").toUpperCase() === "PARENT"));
     } catch { toast.error("Failed to load parents"); }
     finally { setLoading(false); }
   };
@@ -26,7 +27,7 @@ const ListParents = () => {
 
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete parent ${name}?`)) return;
-    try { await api.delete(`parents/${id}/`); toast.success("Parent deleted"); fetchParents(); }
+try { await api.delete(`accounts/users/${id}/delete/`); toast.success("Parent deleted"); fetchParents(); }
     catch { toast.error("Delete failed"); }
   };
 

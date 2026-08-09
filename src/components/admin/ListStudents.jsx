@@ -33,10 +33,10 @@ const ListStudents = () => {
   );
 
   // ── Delete student ──
-  const handleDelete = async (id, fullName) => {
+const handleDelete = async (id, fullName) => {
     if (!window.confirm(`Permanently delete ${fullName}?`)) return;
     try {
-      await api.delete(`students/${id}/`);
+      await api.delete(`students/delete/${id}/`);
       toast.success("Student deleted successfully");
       fetchStudents(); // refresh list
     } catch {
@@ -52,7 +52,7 @@ const ListStudents = () => {
     const newStream = prompt(`Enter NEW stream (leave blank to keep: ${student.stream || "None"}):`);
 
     try {
-      await api.patch(`students/${student.id}/`, {
+await api.patch(`students/update/${student.id}/`, {
         current_class: newClass.trim(),
         stream: newStream?.trim() || student.stream,
         notes: `${student.notes || ""}\n[${new Date().toLocaleDateString()}] Transferred to Class ${newClass}`
@@ -73,7 +73,7 @@ const ListStudents = () => {
     if (!confirm) return;
 
     try {
-      await api.patch(`students/${student.id}/`, {
+await api.patch(`students/update/${student.id}/`, {
         school_name: newSchool,
         is_active: false, // no longer active here
         notes: `${student.notes || ""}\n[${new Date().toLocaleDateString()}] TRANSFERRED TO: ${newSchool}`

@@ -33,8 +33,8 @@ const AddParent = () => {
     e.preventDefault();
     setSubmitting(true);
 
-    try {
-      await api.post("parents/", form);
+try {
+      await api.post("accounts/register/", { ...form, role: "PARENT" });
       toast.success("✅ Parent/Guardian registered successfully!");
       navigate("/admin-dashboard/parents"); // go back to list
     } catch (err) {

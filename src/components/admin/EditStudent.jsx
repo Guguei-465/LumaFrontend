@@ -67,7 +67,7 @@ const EditStudent = () => {
     setLoading(true);
 
     try {
-      await api.patch(`students/${id}/`, form);
+await api.patch(`students/update/${id}/`, form);
       toast.success("✅ Student updated successfully!");
       setTimeout(() => navigate("/admin-dashboard/students"), 1200);
     } catch (err) {

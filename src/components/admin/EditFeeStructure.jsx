@@ -27,7 +27,7 @@ const EditFeeStructure = () => {
   useEffect(() => {
     const fetchStructure = async () => {
       try {
-        const { data } = await api.get(`fees/structures/${id}/`);
+const { data } = await api.get(`fees/fee-structures/${id}/`);
         setForm({
           class_name: data.class_name || "",
           term: data.term || "",
@@ -57,7 +57,7 @@ const EditFeeStructure = () => {
   const handleSubmit = async (e) => {
     e.preventDefault(); setLoading(true);
     try {
-      await api.patch(`fees/structures/${id}/`, {...form, total_fee: total});
+await api.patch(`fees/fee-structures/${id}/`, {...form, total_fee: total});
       toast.success("✅ Fee structure updated successfully!");
       setTimeout(() => navigate("/admin-dashboard/fees/structures"), 1200);
     } catch (err) {
