@@ -4,10 +4,10 @@ import { toast } from "react-toastify";
 import api from "../api/api";
 
 const EditTeacher = () => {
-  const { id } = useParams(); // Teacher ID from URL
+  const { id } = useParams(); 
   const navigate = useNavigate();
 
-  // ✅ EXACT same fields as AddTeacher for perfect consistency
+  // EXACT same fields as AddTeacher for perfect consistency
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -38,7 +38,7 @@ const { data } = await api.get(`accounts/users/${id}/`);
           is_active: data.is_active ?? true
         });
       } catch (err) {
-        toast.error("❌ Failed to load teacher details.");
+        toast.error("Failed to load teacher details.");
       } finally {
         setFetching(false);
       }
@@ -59,7 +59,7 @@ const { data } = await api.get(`accounts/users/${id}/`);
     setLoading(true);
 
     try {
-await api.patch(`accounts/users/${id}/update/`, form);
+await api.put(`accounts/users/${id}/update/`, form);
       toast.success("✅ Teacher details updated successfully!");
       setTimeout(() => navigate("/admin-dashboard/teachers"), 1200);
     } catch (err) {

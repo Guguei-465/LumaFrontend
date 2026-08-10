@@ -2,6 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/api";
+import AdminSubNav from "./AdminSubNav";
+
+const studentTabs = [
+  { to: "/admin-dashboard/students", end: true, icon: "bi bi-list-ul", label: "Students List" },
+  { to: "/admin-dashboard/students/add", icon: "bi bi-person-plus-fill", label: "Register Student" },
+];
 
 const ListStudents = () => {
   const [students, setStudents] = useState([]);
@@ -94,25 +100,29 @@ await api.patch(`students/update/${student.id}/`, {
     </span>
   );
 
-  return (
-    <div className="p-4">
-      {/* Page Header + Search + Add Button */}
+return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">Student Management</h2>
+        <p className="text-gray-500 mt-1">Register, manage and track all student records</p>
+      </div>
+
+      <AdminSubNav items={studentTabs} title="Student Records" />
+
+      {/* Toolbar */}
       <div className="flex flex-col md:flex-row justify-between gap-3 mb-5">
-        <h2 className="text-2xl font-bold">Student Management</h2>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            placeholder="Search name / admission / class..."
-            className="milk-input flex-1"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <button
-            onClick={() => navigate("/admin-dashboard/students/add")}
-            className="milk-btn whitespace-nowrap">
-            + Register New Student
-          </button>
-        </div>
+        <input
+          type="text"
+          placeholder="Search name / admission / class..."
+          className="milk-input md:max-w-sm"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <button
+          onClick={() => navigate("/admin-dashboard/students/add")}
+          className="milk-btn whitespace-nowrap">
+          + Register New Student
+        </button>
       </div>
 
       {/* Loading / Empty States */}

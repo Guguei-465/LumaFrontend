@@ -2,11 +2,24 @@ import { NavLink } from "react-router-dom";
 
 const AdminSideBar = ({ isOpen, setIsOpen }) => {
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-4 px-3 py-3 rounded-lg transition ${
+    `flex items-center gap-4 px-4 py-3 rounded-lg transition ${
       isActive
         ? "bg-teal-600 text-white shadow-md"
         : "text-teal-950 hover:bg-teal-200/60 hover:text-teal-900"
     }`;
+
+  const navItems = [
+    { to: "/admin-dashboard", end: true, icon: "bi bi-speedometer2", label: "Dashboard" },
+    { to: "/admin-dashboard/students", icon: "bi bi-people-fill", label: "Students" },
+    { to: "/admin-dashboard/teachers", icon: "bi bi-person-workspace", label: "Teachers" },
+    { to: "/admin-dashboard/parents", icon: "bi bi-people", label: "Parents" },
+    { to: "/admin-dashboard/fees", icon: "bi bi-cash-coin", label: "Fees" },
+    { to: "/admin-dashboard/attendance", icon: "bi bi-calendar-check", label: "Attendance" },
+    { to: "/admin-dashboard/exams", icon: "bi bi-pencil-square", label: "Exams" },
+    { to: "/admin-dashboard/users", icon: "bi bi-person-badge", label: "Users" },
+    { to: "/admin-dashboard/notices", icon: "bi bi-megaphone-fill", label: "Notices" },
+    { to: "/admin-dashboard/profile", icon: "bi bi-person-fill", label: "Profile" },
+  ];
 
   return (
     <>
@@ -23,80 +36,33 @@ const AdminSideBar = ({ isOpen, setIsOpen }) => {
         }`}
       >
         <div className="p-5">
-          <h2 className="text-2xl font-bold mb-2 text-teal-950">
-            Luma 2000 Academy
-          </h2>
-          <p className="text-xs font-semibold text-teal-900 mb-6 uppercase tracking-wide">
-            Admin Panel
-          </p>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <i className="bi bi-mortarboard-fill text-xl text-white"></i>
+            </div>
+            <div>
+              <h2 className="text-lg font-bold leading-tight text-white">
+                Luma 2000 Academy
+              </h2>
+              <p className="text-xs font-semibold text-teal-200 uppercase tracking-wide">
+                Admin Panel
+              </p>
+            </div>
+          </div>
 
-          <nav className="space-y-2">
-            <NavLink to="/admin-dashboard" end className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-speedometer2"></i> Dashboard
-            </NavLink>
-
-            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">Students</p>
-            <NavLink to="/admin-dashboard/students" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-people-fill"></i> Students List
-            </NavLink>
-            <NavLink to="/admin-dashboard/students/add" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-person-plus-fill"></i> Register Student
-            </NavLink>
-
-            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">Teachers</p>
-            <NavLink to="/admin-dashboard/teachers" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-person-workspace"></i> Teachers List
-            </NavLink>
-            <NavLink to="/admin-dashboard/teachers/add" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-person-plus-fill"></i> Add Teacher
-            </NavLink>
-
-            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">Parents</p>
-            <NavLink to="/admin-dashboard/parents" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-people-fill"></i> Parents List
-            </NavLink>
-            <NavLink to="/admin-dashboard/parents/add" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-person-plus-fill"></i> Add Parent
-            </NavLink>
-
-            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">Fees</p>
-            <NavLink to="/admin-dashboard/fees/structures" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-journal-text"></i> Fee Structures
-            </NavLink>
-            <NavLink to="/admin-dashboard/fees/structures/add" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-journal-plus"></i> New Fee Structure
-            </NavLink>
-            <NavLink to="/admin-dashboard/fees/payments" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-cash-stack"></i> Fee Payments
-            </NavLink>
-            <NavLink to="/admin-dashboard/fees/payments/record" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-cash-coin"></i> Record Payment
-            </NavLink>
-
-            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">Academics</p>
-            <NavLink to="/admin-dashboard/attendance" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-calendar-check"></i> Daily Attendance
-            </NavLink>
-            <NavLink to="/admin-dashboard/attendance/reports" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-clipboard-data"></i> Attendance Reports
-            </NavLink>
-            <NavLink to="/admin-dashboard/exams" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-pencil-square"></i> Exams & Tests
-            </NavLink>
-            <NavLink to="/admin-dashboard/exams/add" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-file-earmark-plus"></i> Create Exam
-            </NavLink>
-
-            <p className="pt-3 text-xs uppercase tracking-wider text-teal-900 font-semibold">System</p>
-            <NavLink to="/admin-dashboard/users" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-people-fill"></i> All Users
-            </NavLink>
-            <NavLink to="/admin-dashboard/notices" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-megaphone-fill"></i> Notices
-            </NavLink>
-            <NavLink to="/admin-dashboard/profile" className={linkClass} onClick={() => setIsOpen(false)}>
-              <i className="bi bi-person-fill"></i> My Profile
-            </NavLink>
+          <nav className="space-y-1.5">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={linkClass}
+                onClick={() => setIsOpen(false)}
+              >
+                <i className={item.icon}></i>
+                <span>{item.label}</span>
+              </NavLink>
+            ))}
           </nav>
         </div>
       </aside>

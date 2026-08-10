@@ -2,6 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/api";
+import AdminSubNav from "./AdminSubNav";
+
+const parentTabs = [
+  { to: "/admin-dashboard/parents", end: true, icon: "bi bi-list-ul", label: "Parents List" },
+  { to: "/admin-dashboard/parents/add", icon: "bi bi-person-plus-fill", label: "Add Parent" },
+];
 
 const ListParents = () => {
   const [parents, setParents] = useState([]);
@@ -31,14 +37,18 @@ try { await api.delete(`accounts/users/${id}/delete/`); toast.success("Parent de
     catch { toast.error("Delete failed"); }
   };
 
-  return (
-    <div className="p-4">
+return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">Parent / Guardian Management</h2>
+        <p className="text-gray-500 mt-1">View and manage all parent & guardian accounts</p>
+      </div>
+
+      <AdminSubNav items={parentTabs} title="Parent Records" />
+
       <div className="flex flex-col md:flex-row justify-between gap-3 mb-5">
-        <h2 className="text-2xl font-bold">Parent / Guardian Management</h2>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input type="text" placeholder="Search name / phone..." className="milk-input flex-1" value={search} onChange={(e) => setSearch(e.target.value)} />
-          <button onClick={() => navigate("/admin-dashboard/parents/add")} className="milk-btn whitespace-nowrap">+ Add New Parent</button>
-        </div>
+        <input type="text" placeholder="Search name / phone..." className="milk-input md:max-w-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <button onClick={() => navigate("/admin-dashboard/parents/add")} className="milk-btn whitespace-nowrap">+ Add New Parent</button>
       </div>
 
       {loading && <p>Loading parents...</p>}

@@ -2,6 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/api";
+import AdminSubNav from "./AdminSubNav";
+
+const feesTabs = [
+  { to: "/admin-dashboard/fees/structures", icon: "bi bi-journal-text", label: "Structures" },
+  { to: "/admin-dashboard/fees/payments", icon: "bi bi-cash-stack", label: "Payments" },
+  { to: "/admin-dashboard/fees/payments/record", icon: "bi bi-cash-coin", label: "Record Payment" },
+];
 
 const FeeStructureList = () => {
   const [feeStructures, setFeeStructures] = useState([]);
@@ -37,14 +44,18 @@ await api.delete(`fees/fee-structures/${id}/`);
 
   const formatAmount = (amt) => `KES ${amt?.toLocaleString() || 0}`;
 
-  return (
-    <div className="p-4">
+return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">Fee Management</h2>
+        <p className="text-gray-500 mt-1">Manage fee structures, payments and records</p>
+      </div>
+
+      <AdminSubNav items={feesTabs} title="Fees Overview" />
+
       <div className="flex flex-col md:flex-row justify-between gap-3 mb-5">
-        <h2 className="text-2xl font-bold">Fee Structures</h2>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input type="text" placeholder="Search class / term..." className="milk-input flex-1" value={search} onChange={(e) => setSearch(e.target.value)} />
-          <button onClick={() => navigate("/admin-dashboard/fees/structures/add")} className="milk-btn whitespace-nowrap">+ New Fee Structure</button>
-        </div>
+        <input type="text" placeholder="Search class / term..." className="milk-input md:max-w-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <button onClick={() => navigate("/admin-dashboard/fees/structures/add")} className="milk-btn whitespace-nowrap">+ New Fee Structure</button>
       </div>
 
       {loading && <p className="text-gray-500">Loading fee structures...</p>}

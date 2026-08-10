@@ -2,6 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/api";
+import AdminSubNav from "./AdminSubNav";
+
+const examTabs = [
+  { to: "/admin-dashboard/exams", end: true, icon: "bi bi-pencil-square", label: "Exams & Tests" },
+  { to: "/admin-dashboard/exams/add", icon: "bi bi-file-earmark-plus", label: "Create Exam" },
+];
 
 const ExamList = () => {
   const [exams, setExams] = useState([]);
@@ -31,14 +37,18 @@ const ExamList = () => {
     }`}>{status}</span>
   );
 
-  return (
-    <div className="p-4">
+return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">Examinations & Tests</h2>
+        <p className="text-gray-500 mt-1">Create exams, enter marks and track results</p>
+      </div>
+
+      <AdminSubNav items={examTabs} title="Exams Overview" />
+
       <div className="flex flex-col md:flex-row justify-between gap-3 mb-5">
-        <h2 className="text-2xl font-bold">Examinations & Tests</h2>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <input type="text" placeholder="Search exam / term..." className="milk-input flex-1" value={search} onChange={(e) => setSearch(e.target.value)} />
-          <button onClick={() => navigate("/admin-dashboard/exams/add")} className="milk-btn whitespace-nowrap">+ Create New Exam</button>
-        </div>
+        <input type="text" placeholder="Search exam / term..." className="milk-input md:max-w-sm" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <button onClick={() => navigate("/admin-dashboard/exams/add")} className="milk-btn whitespace-nowrap">+ Create New Exam</button>
       </div>
 
       {loading && <p className="text-gray-500">Loading exams...</p>}

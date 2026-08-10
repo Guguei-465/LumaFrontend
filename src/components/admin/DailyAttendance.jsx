@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/api";
+import AdminSubNav from "./AdminSubNav";
+
+const attendanceTabs = [
+  { to: "/admin-dashboard/attendance", end: true, icon: "bi bi-calendar-check", label: "Daily Attendance" },
+  { to: "/admin-dashboard/attendance/reports", icon: "bi bi-clipboard-data", label: "Attendance Reports" },
+];
 
 const DailyAttendance = () => {
-  const navigate = useNavigate();
   const [selectedClass, setSelectedClass] = useState("");
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
   const [students, setStudents] = useState([]);
@@ -63,12 +67,14 @@ await api.post("attendance/create/", {
     } finally { setSaving(false); }
   };
 
-  return (
-    <div className="p-4">
-      <div className="flex flex-col md:flex-row justify-between gap-3 mb-5">
-        <h2 className="text-2xl font-bold">Daily Attendance Marking</h2>
-        <button onClick={() => navigate("/admin-dashboard/attendance/reports")} className="milk-btn whitespace-nowrap">View Attendance Reports</button>
+return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">Attendance Management</h2>
+        <p className="text-gray-500 mt-1">Mark daily attendance and generate reports</p>
       </div>
+
+      <AdminSubNav items={attendanceTabs} title="Attendance Overview" />
 
       {/* Filters */}
       <div className="card p-4 mb-5">

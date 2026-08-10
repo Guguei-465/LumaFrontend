@@ -131,7 +131,8 @@ function App() {
             <Route path="teachers/edit/:id" element={<EditTeacher />} />
             <Route path="parents" element={<ListParents />} />
             <Route path="parents/add" element={<AddParent />} />
-            <Route path="parents/edit/:id" element={<EditParent />} />
+<Route path="parents/edit/:id" element={<EditParent />} />
+            <Route path="fees" element={<Navigate to="/admin-dashboard/fees/structures" replace />} />
             <Route path="fees/structures" element={<FeeStructureList />} />
             <Route path="fees/structures/add" element={<AddFeeStructure />} />
             <Route path="fees/structures/edit/:id" element={<EditFeeStructure />} />
