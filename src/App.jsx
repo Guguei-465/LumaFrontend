@@ -45,7 +45,6 @@ import TimetableForm from "./components/academiccoordinator/TimetableForm";
 import AcademicCoProfile from "./components/academiccoordinator/AademicCoProfile";
 import LearningOutcomes from "./components/academiccoordinator/LearnigOutcomes";
 import GradeScales from "./components/academiccoordinator/GradeScales";
-import ReportComments from "./components/academiccoordinator/ReportComments";
 import ResultSubmissions from "./components/academiccoordinator/ResultSubmissions";
 import StudentResults from "./components/academiccoordinator/StudentResults";
 import Attendance from "./components/academiccoordinator/Attendance";
@@ -84,6 +83,15 @@ import AdminUserList from "./components/admin/AdminUserList";
 import AdminNotices from "./components/admin/AdminNotices";
 import AdminProfile from "./components/admin/AdminProfile";
 import AddStudent from "./components/admin/AddStudent";
+import AcademicCoClasses from "./components/academiccoordinator/AcademicCoClasses";
+import CoordinatorTeachers from "./components/academiccoordinator/CoordinatorTeachers";
+import CoordinatorClassDetails from "./components/academiccoordinator/CoordinatorClassDetails";
+import CoordinatorStudentDetails from "./components/academiccoordinator/CoordinatorStudentDetails";
+import CoordinatorStudents from "./components/academiccoordinator/CoordinatorStudents";
+import CoordinatorResults from "./components/academiccoordinator/CoordinatorResults";
+import CoordinatorExamDetails from "./components/academiccoordinator/CoordinatorExamDetails";
+import CoordinatorExams from "./components/academiccoordinator/CoordinatorExams";
+import CoordinatorReports from "./components/academiccoordinator/CoordinatorReports";
 
 function App() {
   return (
@@ -131,7 +139,7 @@ function App() {
             <Route path="teachers/edit/:id" element={<EditTeacher />} />
             <Route path="parents" element={<ListParents />} />
             <Route path="parents/add" element={<AddParent />} />
-<Route path="parents/edit/:id" element={<EditParent />} />
+            <Route path="parents/edit/:id" element={<EditParent />} />
             <Route path="fees" element={<Navigate to="/admin-dashboard/fees/structures" replace />} />
             <Route path="fees/structures" element={<FeeStructureList />} />
             <Route path="fees/structures/add" element={<AddFeeStructure />} />
@@ -161,6 +169,15 @@ function App() {
             <Route path="students" element={<StudentsAcademic />} />
             <Route path="subjects" element={<SubjectsAcademic />} />
             <Route path="attendance" element={<Attendance />} />
+            <Route path="reports" element={<CoordinatorReports />} />
+            <Route path="exams" element={<CoordinatorExams />} />
+            <Route path="classes" element={<AcademicCoClasses />} />
+            <Route path="classes-details/:id" element={<CoordinatorClassDetails />} />
+            <Route path="classes-exam/:id" element={<CoordinatorExamDetails />} />
+            <Route path="student-details/:id" element={<CoordinatorStudentDetails/>} />
+            <Route path="teachers" element={<CoordinatorTeachers />} />
+            <Route path="academic-student" element={<CoordinatorStudents />} />
+            <Route path="academic-results" element={<CoordinatorResults/>} />
             <Route path="attendance/mark" element={<MarkAttendanceCoordinator/>} />
             <Route path="assessments" element={<Assessments />} />
             <Route path="timetable" element={<Timetable />} />
@@ -168,7 +185,6 @@ function App() {
             <Route path="result-submissions" element={<ResultSubmissions />} />
             <Route path="student-results" element={<StudentResults />} />
             <Route path="grade-scales" element={<GradeScales />} />
-            <Route path="report-comments" element={<ReportComments />} />
             <Route path="learning-outcomes" element={<LearningOutcomes />} />
             <Route path="profile" element={<AcademicCoProfile />} />
           </Route>

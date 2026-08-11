@@ -51,6 +51,14 @@ const SideBar = ({ isOpen, setIsOpen }) => {
             {/* Academic Management */}
             <p className={sectionHeading}>Academic Management</p>
             <NavLink 
+              to="/academic-coordinator/teachers" 
+              className={linkClass} 
+              onClick={() => setIsOpen(false)}
+            >
+              <i className="bi bi-people-fill text-lg"></i>
+              Teachers
+            </NavLink>
+            <NavLink 
               to="/academic-coordinator/students" 
               className={linkClass} 
               onClick={() => setIsOpen(false)}

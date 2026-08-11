@@ -132,7 +132,16 @@ const CoordinatorStudents = () => {
                     <td className="py-3 px-3">{stu.gender || "—"}</td>
                     <td className="py-3 px-3 text-center">
                       <button
-                        onClick={() => navigate(`/academic-coordinator/students/${stu.id}`)}
+                        type="button"
+                        onClick={() => {
+                          console.log("Student ID:", stu.id);
+                          console.log(
+                            "Navigating to:",
+                            `/academic-coordinator/student-details/${stu.id}`
+                          );
+
+                          navigate(`/academic-coordinator/student-details/${stu.id}`);
+                        }}
                         className="milk-btn px-4 py-2 text-sm"
                       >
                         View Profile
